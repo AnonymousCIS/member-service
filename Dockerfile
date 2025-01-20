@@ -2,7 +2,7 @@ FROM openjdk:17-jdk
 ARG JAR_FILE=build/libs/memberservice-0.0.1-SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
 
-ENV SPRING_PROFILES_ACTIVE=default
+ENV SPRING_PROFILES_ACTIVE=default,jwt
 ENV DB_HOST=localhost:1521
 ENV DDL_AUTO=update
 
