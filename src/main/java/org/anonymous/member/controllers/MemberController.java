@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member", description = "회원 인증/인가 API")
 @RestController
 @RequiredArgsConstructor
-public class MemberController { ////
+public class MemberController {
 
     @Value("${front.domain}")
     private  String frontDomain;
