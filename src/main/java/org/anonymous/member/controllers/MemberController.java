@@ -20,22 +20,17 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Member", description = "회원 인증/인가 API")
+@Tag(name = "Member", description = "회원 인증/인가/정보수정 API")
 @RestController
 @RequiredArgsConstructor
 public class MemberController {
 
     @Value("${front.domain}")
     private  String frontDomain;
-
     private final Utils utils;
-
     private final TokenService tokenService;
-
     private final JoinValidator joinValidator;
-
     private final LoginValidator loginValidator;
-
     private final MemberUpdateService updateService;
 
     @PostMapping("/join")
@@ -101,6 +96,32 @@ public class MemberController {
     public JSONData info(@AuthenticationPrincipal MemberInfo memberInfo) {
 
         return new JSONData(memberInfo.getMember());
+    }
+
+    /**
+     * 회원 탈퇴. 진짜 지우는게 아니라 deleteAt 업데이트만 하면 됨.
+     * @return
+     */
+    @PatchMapping("/delete/{seq}")
+    public JSONData delete(@PathVariable Long seq) {
+
+        return null;
+    }
+
+    /**
+     * 회원 정보 수정
+     * @return
+     */
+    @PatchMapping("/edit")
+    public JSONData edit(@RequestParam RequestUpdate update, Errors errors) {
+
+        if(errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
+        // 이제 여기 수정 넣으면 됨. 더 추가될거 있으면 추가하면됨.
+
+        return null;
     }
 
     // 회원 전용 접근 테스트
