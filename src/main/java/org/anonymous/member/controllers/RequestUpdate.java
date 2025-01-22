@@ -30,4 +30,6 @@ public class RequestUpdate {
 
     @NotNull
     private LocalDate birthDt;
+
+    private String mode;
 }

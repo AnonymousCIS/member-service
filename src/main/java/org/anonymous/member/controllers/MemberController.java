@@ -12,6 +12,7 @@ import org.anonymous.member.jwt.TokenService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
+import org.anonymous.member.validators.UpdateValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +32,7 @@ public class MemberController {
     private final TokenService tokenService;
     private final JoinValidator joinValidator;
     private final LoginValidator loginValidator;
+    private final UpdateValidator updateValidator;
     private final MemberUpdateService updateService;
 
     @PostMapping("/join")
@@ -115,6 +117,9 @@ public class MemberController {
     @PatchMapping("/edit")
     public JSONData edit(@RequestBody @Valid RequestUpdate update, Errors errors) {
 
+        update.setMode("edit");
+        updateValidator.validate(update,errors);
+
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
@@ -130,7 +135,15 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/password")
-    public JSONData password(@RequestBody RequestUpdate update) {
+    public JSONData password(@RequestBody @Valid RequestUpdate update, Errors errors) {
+        update.setMode("change");
+        updateValidator.validate(update,errors);
+
+        if(errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
+        // 수정처리 ㄱㄱ
 
         return null;
     }

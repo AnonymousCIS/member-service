@@ -2,7 +2,10 @@ package org.anonymous.member.controllers;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.anonymous.global.paging.ListData;
 import org.anonymous.global.rests.JSONData;
+import org.anonymous.member.entities.Member;
+import org.anonymous.member.services.MemberInfoService;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,14 +16,26 @@ import org.springframework.web.bind.annotation.*;
 public class AdminMemberController {
 
 
+    private final MemberInfoService memberInfoService;
+
     /**
      * 회원 단일 조회
      * @return
      */
     @GetMapping("/info/{seq}")
     public JSONData info(@PathVariable Long seq) {
+        Member member = (Member) memberInfoService.loadUserBySeq(seq);
+        return new JSONData(member);
+    }
 
-        return null;
+    /**
+     * 회원 단일 조회
+     * @return
+     */
+    @GetMapping("/info/{email}")
+    public JSONData info(@PathVariable String email) {
+        Member member = (Member) memberInfoService.loadUserByUsername(email);
+        return new JSONData(member);
     }
 
     /**
@@ -29,8 +44,8 @@ public class AdminMemberController {
      */
     @GetMapping("/list")
     public JSONData list(MemberSearch search) {
-
-        return null;
+        ListData<Member> memberList = memberInfoService.getList(search);
+        return new JSONData(memberList);
     }
 
     /**
@@ -48,9 +63,9 @@ public class AdminMemberController {
      * @return
      */
     @PatchMapping("/update")
-    public JSONData edit(@RequestParam RequestUpdate update, Errors errors) {
+    public JSONData edit(@RequestBody RequestUpdate update, Errors errors) {
 
-        if(errors.hasErrors()) {
+        if (errors.hasErrors()) {
 
         }
 
