@@ -6,7 +6,10 @@ import lombok.Data;
 import lombok.ToString;
 import org.anonymous.global.entities.BaseEntity;
 import org.anonymous.member.constants.Authority;
+import org.anonymous.member.constants.Gender;
+import org.anonymous.member.constants.MemberCondition;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,23 +24,38 @@ public class Member extends BaseEntity {
     @Id @GeneratedValue
     private Long seq; // 회원 번호
 
+    @Column(length = 40, nullable = false)
+    private String name;
+
     @Column(length = 65, nullable = false, unique = true)
     private String email; // 이메일 (로그인 ID)
 
     @Column(length = 65, nullable = false)
     private String password;
 
-    @Column(length = 40, nullable = false)
-    private String name;
+    @Column(length = 10, nullable = false)
+    private String zipCode;
 
-    private boolean requiredTerms1; // 필수 약관
+    @Column(length = 100, nullable = false)
+    private String address;
 
-    private boolean requiredTerms2;
+    @Column(length = 100)
+    private String addressSub;
 
-    private boolean requiredTerms3;
+    @Column(length=20, nullable = false)
+    private String phoneNumber;
 
     @Column(length = 50)
     private String optionalTerms; // 선택 약관
+
+    @Column(length = 10, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Column(nullable = false)
+    private LocalDate birthDt;
+
+    private MemberCondition memberCondition;
 
     @JsonIgnore // 순환 참조 발생 방지용
     @ToString.Exclude

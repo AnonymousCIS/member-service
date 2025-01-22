@@ -28,7 +28,7 @@ public class AdminMemberController {
      * @return
      */
     @GetMapping("/list")
-    public JSONData list() {
+    public JSONData list(MemberSearch search) {
 
         return null;
     }

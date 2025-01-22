@@ -1,0 +1,22 @@
+package org.anonymous.member.entities;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@IdClass(MemberStatusId.class) // MemberStatusId = 복합키
+public class MemberStatus {
+
+    @Id
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
+
+    private boolean isBlock;
+
+    @Id
+    private String type;
+
+    @Id
+    private Long seq;
+}

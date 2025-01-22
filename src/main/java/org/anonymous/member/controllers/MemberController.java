@@ -113,13 +113,24 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/edit")
-    public JSONData edit(@RequestParam RequestUpdate update, Errors errors) {
+    public JSONData edit(@RequestBody @Valid RequestUpdate update, Errors errors) {
 
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
 
         // 이제 여기 수정 넣으면 됨. 더 추가될거 있으면 추가하면됨.
+
+        return null;
+    }
+
+    /**
+     * 비밀번호 찾기 후 수정.
+     * @param update
+     * @return
+     */
+    @PatchMapping("/password")
+    public JSONData password(@RequestBody RequestUpdate update) {
 
         return null;
     }

@@ -9,11 +9,8 @@ import java.util.List;
 @Data
 public class RequestUpdate {
 
-    @Size(min=8, max=40)
-    @NotBlank
     private String password;
 
-    @NotBlank
     private String confirmPassword;
 
     @NotBlank
