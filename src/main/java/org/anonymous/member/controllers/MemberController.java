@@ -9,12 +9,14 @@ import org.anonymous.global.libs.Utils;
 import org.anonymous.global.rests.JSONData;
 import org.anonymous.member.MemberInfo;
 import org.anonymous.member.jwt.TokenService;
+import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
 import org.anonymous.member.validators.UpdateValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
@@ -34,6 +36,7 @@ public class MemberController {
     private final LoginValidator loginValidator;
     private final UpdateValidator updateValidator;
     private final MemberUpdateService updateService;
+    private final MemberRepository memberRepository;
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
@@ -147,6 +150,28 @@ public class MemberController {
 
         return null;
     }
+
+    /*********** 강사님추가 S  *************/
+    @GetMapping("/info/{email}")
+    public JSONData info(@PathVariable("email") String email) {
+        try {
+            Long seq = Long.valueOf(email);
+            // 회원번호
+
+        } catch (Exception e) {
+            // 이메일
+        }
+        return null;
+    }
+
+    @GetMapping("/exists/{email}")
+    public ResponseEntity<Void> exists(@PathVariable("email") String email) {
+        HttpStatus status = memberRepository.exists(email) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+
+
+        return ResponseEntity.status(status).build();
+    }
+    /*********** 강사님추가 E  *************/
 
     // 회원 전용 접근 테스트
     @PreAuthorize("isAuthenticated()")
