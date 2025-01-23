@@ -22,19 +22,16 @@ public class AdminMemberController {
      * 회원 단일 조회
      * @return
      */
-    @GetMapping("/info/{seq}")
-    public JSONData info(@PathVariable Long seq) {
-        Member member = (Member) memberInfoService.loadUserBySeq(seq);
-        return new JSONData(member);
-    }
-
-    /**
-     * 회원 단일 조회
-     * @return
-     */
     @GetMapping("/info/{email}")
-    public JSONData info(@PathVariable String email) {
-        Member member = (Member) memberInfoService.loadUserByUsername(email);
+    public JSONData info(@PathVariable("email") String email) {
+        Member member = null;
+        try {
+            Long seq = Long.valueOf(email);
+            member = memberInfoService.get(seq);
+        } catch (Exception e) {
+            // 이메일
+            member = memberInfoService.get(email);
+        }
         return new JSONData(member);
     }
 

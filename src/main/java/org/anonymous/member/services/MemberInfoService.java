@@ -132,6 +132,18 @@ public class MemberInfoService implements UserDetailsService {
     }
 
     /**
+     * seq 로 회원 조회
+     *
+     * @param seq
+     * @return
+     */
+    public Member get(Long seq) {
+        MemberInfo memberInfo = (MemberInfo)loadUserBySeq(seq);
+
+        return memberInfo.getMember();
+    }
+
+    /**
      * 회원 목록
      * @param search
      * @return

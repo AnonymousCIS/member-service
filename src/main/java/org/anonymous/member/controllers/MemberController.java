@@ -8,8 +8,11 @@ import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
 import org.anonymous.global.rests.JSONData;
 import org.anonymous.member.MemberInfo;
+import org.anonymous.member.entities.Member;
 import org.anonymous.member.jwt.TokenService;
 import org.anonymous.member.repositories.MemberRepository;
+import org.anonymous.member.services.MemberDeleteService;
+import org.anonymous.member.services.MemberInfoService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberController {
 
+    private final MemberInfoService memberInfoService;
     @Value("${front.domain}")
     private  String frontDomain;
     private final Utils utils;
@@ -37,6 +41,7 @@ public class MemberController {
     private final UpdateValidator updateValidator;
     private final MemberUpdateService updateService;
     private final MemberRepository memberRepository;
+    private final MemberDeleteService memberDeleteService;
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
@@ -97,6 +102,7 @@ public class MemberController {
      *
      * @return
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/")
     public JSONData info(@AuthenticationPrincipal MemberInfo memberInfo) {
 
@@ -107,21 +113,23 @@ public class MemberController {
      * 회원 탈퇴. 진짜 지우는게 아니라 deleteAt 업데이트만 하면 됨.
      * @return
      */
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/delete/{seq}")
     public JSONData delete(@PathVariable Long seq) {
-
-        return null;
+        Member member = memberDeleteService.delete(seq);
+        return new JSONData(member);
     }
 
     /**
      * 회원 정보 수정
      * @return
      */
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/edit")
     public JSONData edit(@RequestBody @Valid RequestUpdate update, Errors errors) {
 
         update.setMode("edit");
-        updateValidator.validate(update,errors);
+        updateValidator.validate(update, errors);
 
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
@@ -140,7 +148,7 @@ public class MemberController {
     @PatchMapping("/password")
     public JSONData password(@RequestBody @Valid RequestUpdate update, Errors errors) {
         update.setMode("change");
-        updateValidator.validate(update,errors);
+        updateValidator.validate(update, errors);
 
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
@@ -152,23 +160,24 @@ public class MemberController {
     }
 
     /*********** 강사님추가 S  *************/
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/info/{email}")
     public JSONData info(@PathVariable("email") String email) {
+        Member member = null;
         try {
             Long seq = Long.valueOf(email);
-            // 회원번호
-
+            member = memberInfoService.get(seq);
         } catch (Exception e) {
             // 이메일
+            member = memberInfoService.get(email);
         }
-        return null;
+        return new JSONData(member);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/exists/{email}")
     public ResponseEntity<Void> exists(@PathVariable("email") String email) {
         HttpStatus status = memberRepository.exists(email) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-
-
         return ResponseEntity.status(status).build();
     }
     /*********** 강사님추가 E  *************/

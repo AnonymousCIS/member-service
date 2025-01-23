@@ -20,11 +20,8 @@ import java.util.Collection;
 public class MemberInfo implements UserDetails {
 
     private String email;
-
     private String password;
-
     private Collection<? extends GrantedAuthority> authorities;
-
     private Member member;
 
     @Override

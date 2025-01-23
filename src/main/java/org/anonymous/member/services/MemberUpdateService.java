@@ -1,8 +1,10 @@
 package org.anonymous.member.services;
 
 import lombok.RequiredArgsConstructor;
+import org.anonymous.member.MemberInfo;
 import org.anonymous.member.constants.Authority;
 import org.anonymous.member.controllers.RequestJoin;
+import org.anonymous.member.controllers.RequestUpdate;
 import org.anonymous.member.entities.Authorities;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.QAuthorities;
@@ -10,9 +12,11 @@ import org.anonymous.member.repositories.AuthoritiesRepository;
 import org.anonymous.member.repositories.MemberRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +41,7 @@ public class MemberUpdateService {
     // ModelMapper
     // 같은 getter setter 처리시 일괄 처리해주는 Reflection API 편의 기능
     private final ModelMapper modelMapper;
+    private final MemberInfoService memberInfoService;
 
     /**
      * 메서드 오버로드 - 커맨드 객체의 타입에 따라서
@@ -81,6 +86,30 @@ public class MemberUpdateService {
         auth.setAuthority(Authority.USER);
 
         save(member, List.of(auth)); // 회원 저장 처리
+    }
+
+    public void process(RequestUpdate form, List<Authority> authorities) {
+        String email = form.getEmail();
+
+        Member member = memberInfoService.get(email);
+        if (member == null) throw new UsernameNotFoundException(email);
+        String password = member.getPassword();
+
+        if (form.getMode().equals("edit")) {
+            if (StringUtils.hasText(password)) {
+                String hash = passwordEncoder.encode(password);
+                member.setPassword(hash);
+                member.setCredentialChangedAt(LocalDateTime.now());
+            }
+            member.setZipCode(form.getZipCode());
+            member.setAddress(form.getAddress());
+            member.setAddressSub(form.getAddressSub());
+            member.setPhoneNumber(form.getPhoneNumber());
+        } else {
+            String hash = passwordEncoder.encode(password);
+            member.setPassword(hash);
+            member.setCredentialChangedAt(LocalDateTime.now());
+        }
     }
 
 
