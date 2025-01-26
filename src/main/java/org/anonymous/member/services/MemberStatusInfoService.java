@@ -9,10 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.anonymous.global.paging.ListData;
 import org.anonymous.global.paging.Pagination;
+import org.anonymous.member.constants.MemberDomainStatus;
 import org.anonymous.member.controllers.MemberStatusSearch;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.MemberStatus;
-import org.anonymous.member.entities.MemberStatusId;
 import org.anonymous.member.entities.QMemberStatus;
 import org.anonymous.member.repositories.MemberStatusRepository;
 import org.springframework.context.annotation.Lazy;
@@ -39,7 +39,7 @@ public class MemberStatusInfoService {
 
     public List<MemberStatus> status(String email) {
         Member member = memberInfoService.get(email);
-        QMemberStatus qMemberStatus = QMemberStatus.memberStatus;
+        QMemberStatus qMemberStatus = QMemberStatus.memberStatus1;
 
         return queryFactory.selectFrom(qMemberStatus)
                 .where(qMemberStatus.member.in(member))
@@ -52,7 +52,7 @@ public class MemberStatusInfoService {
         limit = limit < 1 ? 20 : limit;
         int offset = (page - 1) * limit;
 
-        QMemberStatus qMemberStatus = QMemberStatus.memberStatus;
+        QMemberStatus qMemberStatus = QMemberStatus.memberStatus1;
 
         BooleanBuilder andBuilder = new BooleanBuilder();
 
@@ -74,10 +74,8 @@ public class MemberStatusInfoService {
                 condition = qMemberStatus.member.email;
             } else if (sopt.equals("TYPE")) {
                 condition = qMemberStatus.type;
-            } else if (sopt.equals("BLOCK")) {
-                condition = qMemberStatus.isBlock.stringValue();
             } else {
-                condition = qMemberStatus.member.name.concat(qMemberStatus.type).concat(qMemberStatus.isBlock.stringValue());
+                condition = qMemberStatus.member.name.concat(qMemberStatus.type);
             }
 
             andBuilder.and(condition.contains(skey));
@@ -106,9 +104,9 @@ public class MemberStatusInfoService {
 
         // region block 검색
 
-        List<Boolean> isBlock = search.getIsBlock();
-        if (isBlock != null && !isBlock.isEmpty()) {
-            andBuilder.and(qMemberStatus.isBlock.in(isBlock));
+        List<MemberDomainStatus> domainStatuses = search.getDomainStatuses();
+        if (domainStatuses != null && !domainStatuses.isEmpty()) {
+            andBuilder.and(qMemberStatus.memberStatus.in(domainStatuses));
         }
 
         // endregion

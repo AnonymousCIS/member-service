@@ -2,6 +2,7 @@ package org.anonymous.member.services;
 
 import lombok.RequiredArgsConstructor;
 import org.anonymous.member.constants.Authority;
+import org.anonymous.member.constants.MemberCondition;
 import org.anonymous.member.controllers.RequestJoin;
 import org.anonymous.member.controllers.RequestUpdate;
 import org.anonymous.member.entities.Authorities;
@@ -85,6 +86,8 @@ public class MemberUpdateService {
         auth.setMember(member);
         // 처음 가입시 일반 회원(USER)
         auth.setAuthority(Authority.USER);
+
+        member.setMemberCondition(MemberCondition.ACTIVE);
 
         save(member, List.of(auth)); // 회원 저장 처리
 

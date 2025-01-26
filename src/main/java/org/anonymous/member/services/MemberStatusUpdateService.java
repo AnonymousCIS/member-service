@@ -61,7 +61,7 @@ public class MemberStatusUpdateService {
 
     private void addInfo(MemberStatus memberStatus, RequestStatus form) {
 
-        memberStatus.setBlock(form.isBlock());
+        memberStatus.setMemberStatus(form.getStatus());
         memberStatus.setSeq(form.getSeq());
         memberStatus.setType(form.getType());
     }

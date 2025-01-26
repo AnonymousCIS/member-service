@@ -3,6 +3,7 @@ package org.anonymous.member.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.anonymous.global.entities.MemberBaseEntity;
+import org.anonymous.member.constants.MemberDomainStatus;
 
 @Data
 @Entity
@@ -13,7 +14,8 @@ public class MemberStatus extends MemberBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private boolean isBlock;
+    @Enumerated(EnumType.STRING)
+    private MemberDomainStatus memberStatus;
 
     @Id
     private String type;

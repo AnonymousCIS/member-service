@@ -1,14 +1,14 @@
 package org.anonymous.member.controllers;
 
 import lombok.Data;
-import org.anonymous.global.entities.BaseEntity;
+import org.anonymous.member.constants.MemberDomainStatus;
 
 @Data
 public class RequestStatus {
 
     private String email;
 
-    private boolean isBlock;
+    private MemberDomainStatus status;
 
     private String type;
 

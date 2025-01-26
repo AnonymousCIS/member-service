@@ -22,20 +22,21 @@ public class LoginFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
 
+        if (httpRequest.getRequestURI().startsWith("/swagger-ui") || httpRequest.getRequestURI().startsWith("/v3/api-docs")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         try {
             // Token 이 유입되면 로그인 처리
             tokenService.authenticate((HttpServletRequest) request);
 
         } catch (UnAuthorizedException e) {
-
             HttpServletResponse res = (HttpServletResponse) response;
-
             res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-
             e.printStackTrace();
         }
-
         filterChain.doFilter(request, response);
     }
 }
