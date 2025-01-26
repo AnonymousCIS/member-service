@@ -1,13 +1,13 @@
 package org.anonymous.member.services;
 
 import lombok.RequiredArgsConstructor;
-import org.anonymous.member.MemberInfo;
 import org.anonymous.member.constants.Authority;
 import org.anonymous.member.controllers.RequestJoin;
 import org.anonymous.member.controllers.RequestUpdate;
 import org.anonymous.member.entities.Authorities;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.QAuthorities;
+import org.anonymous.member.libs.MemberUtil;
 import org.anonymous.member.repositories.AuthoritiesRepository;
 import org.anonymous.member.repositories.MemberRepository;
 import org.modelmapper.ModelMapper;
@@ -37,6 +37,7 @@ public class MemberUpdateService {
     private final AuthoritiesRepository authoritiesRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final MemberUtil memberUtil;
 
     // ModelMapper
     // 같은 getter setter 처리시 일괄 처리해주는 Reflection API 편의 기능
@@ -51,7 +52,7 @@ public class MemberUpdateService {
      *
      * @param form
      */
-    public void process(RequestJoin form) {
+    public Member process(RequestJoin form) {
 
         // 커맨드 객체 -> Entity 객체로 Data 옮기기
         /*
@@ -86,16 +87,20 @@ public class MemberUpdateService {
         auth.setAuthority(Authority.USER);
 
         save(member, List.of(auth)); // 회원 저장 처리
+
+        return member;
     }
 
-    public void process(RequestUpdate form, List<Authority> authorities) {
+    public Member process(RequestUpdate form, List<Authority> authorities) {
         String email = form.getEmail();
+        System.out.println("email: " + email);
 
-        Member member = memberInfoService.get(email);
-        if (member == null) throw new UsernameNotFoundException(email);
-        String password = member.getPassword();
+/*        Member member = memberUtil.isAdmin() && StringUtils.hasText(email) ? memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email)) : memberUtil.getMember(); // 로그인한 사용자의 정보를 가지고온다.*/
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+        System.out.println("member : " + member);
+        String password = form.getPassword();
 
-        if (form.getMode().equals("edit")) {
+        if (form.getMode().equals("edit")) { // 수정
             if (StringUtils.hasText(password)) {
                 String hash = passwordEncoder.encode(password);
                 member.setPassword(hash);
@@ -105,11 +110,35 @@ public class MemberUpdateService {
             member.setAddress(form.getAddress());
             member.setAddressSub(form.getAddressSub());
             member.setPhoneNumber(form.getPhoneNumber());
-        } else {
+            List<String> optionalTerms = form.getOptionalTerms();
+            if (optionalTerms != null) {
+                member.setOptionalTerms(String.join("||", optionalTerms));
+            }
+
+        } else { // 비밀번호 찾기
             String hash = passwordEncoder.encode(password);
             member.setPassword(hash);
             member.setCredentialChangedAt(LocalDateTime.now());
         }
+
+        List<Authorities> _authorities = null;
+
+        if (authorities != null && memberUtil.isAdmin()) {
+            _authorities = authorities.stream().map(a -> {
+                Authorities auth = new Authorities();
+                auth.setAuthority(a);
+                auth.setMember(member);
+                return auth;
+            }).toList();
+        }
+
+        save(member, _authorities);
+
+        return member;
+    }
+
+    public Member process(RequestUpdate form) {
+        return process(form, null);
     }
 
 

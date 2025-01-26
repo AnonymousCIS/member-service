@@ -2,12 +2,14 @@ package org.anonymous.member;
 
 import lombok.Builder;
 import lombok.Data;
+import org.anonymous.member.constants.Authority;
 import org.anonymous.member.entities.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * UserDetails Interface - DTO
@@ -23,6 +25,8 @@ public class MemberInfo implements UserDetails {
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
     private Member member;
+    private List<Authority> _authorities;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

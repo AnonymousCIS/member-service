@@ -34,6 +34,8 @@ public class MemberControllerTest {
     @Autowired
     private ObjectMapper om;
 
+    // region 회원가입 & 로그인 테스트
+
     @Test
     @DisplayName("회원가입 & 로그인 테스트")
     void joinTest() throws Exception {
@@ -80,7 +82,38 @@ public class MemberControllerTest {
         mockMvc.perform(get("/test")
                 .header("Authorization", "Bearer " + token))
                 .andDo(print());
-
-
     }
+
+    // endregion
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

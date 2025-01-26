@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class RequestUpdate {
 
+    @NotBlank
     private String email; // 절대 바뀌면 안됨. 그냥 값만 먼저 받고 Member 확인용으로 하려고 하는거
 
     private String password;
@@ -32,9 +33,6 @@ public class RequestUpdate {
     private List<String> optionalTerms;
 
     private List<Authority> authorities;
-
-    @NotNull
-    private LocalDate birthDt;
 
     private String mode;
 }

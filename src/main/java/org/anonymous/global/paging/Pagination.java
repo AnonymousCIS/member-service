@@ -70,7 +70,13 @@ public class Pagination {
 
         /* 쿼리스트링 값 처리 S */
         String qs = request == null ? "" : request.getQueryString();
-        baseUrl = request == null ? "?" : String.format("%s://%s:%d%s?", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+        if (request == null) {
+            baseUrl = "?";
+        } else {
+            int port = request.getServerPort();
+            String _port = port == 80 || port == 443 ? "" : ":" + port;
+            baseUrl = String.format("%s://%s%s%s/?", request.getScheme(), request.getServerName(), _port, StringUtils.hasText(request.getContextPath()) ? request.getContextPath() : "/");
+        }
         if (StringUtils.hasText(qs)) {
             baseUrl += Arrays.stream(qs.split("&"))
                     .filter(s -> !s.contains("page="))

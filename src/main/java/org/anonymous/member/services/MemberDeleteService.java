@@ -19,16 +19,30 @@ public class MemberDeleteService {
     private final MemberRepository memberRepository;
     private final MemberInfoService memberInfoService;
 
+    public Member userDelete(Long seq) {
+        Member member = addInfo(seq);
+
+        member.setDeletedAt(LocalDateTime.now());
+
+        memberRepository.saveAndFlush(member);
+
+        return member;
+    }
+
     public Member delete(Long seq) {
+        Member member = addInfo(seq);
+
+        memberRepository.delete(member);
+        memberRepository.saveAndFlush(member);
+        return member;
+    }
+
+    private Member addInfo(Long seq) {
         Member member = memberInfoService.get(seq);
 
         if (member == null) {
             throw new MemberNotFoundException();
         }
-
-        member.setDeletedAt(LocalDateTime.now());
-
-        memberRepository.saveAndFlush(member);
 
         return member;
     }

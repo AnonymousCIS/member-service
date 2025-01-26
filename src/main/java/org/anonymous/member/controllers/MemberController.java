@@ -1,5 +1,6 @@
 package org.anonymous.member.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,7 +17,9 @@ import org.anonymous.member.services.MemberInfoService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
+import org.anonymous.member.validators.PasswordValidator;
 import org.anonymous.member.validators.UpdateValidator;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,16 +34,19 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberController {
 
-    private final MemberInfoService memberInfoService;
     @Value("${front.domain}")
-    private  String frontDomain;
+    private String frontDomain;
+
     private final Utils utils;
+    private final ModelMapper modelMapper;
     private final TokenService tokenService;
     private final JoinValidator joinValidator;
     private final LoginValidator loginValidator;
     private final UpdateValidator updateValidator;
     private final MemberUpdateService updateService;
     private final MemberRepository memberRepository;
+    private final PasswordValidator passwordValidator;
+    private final MemberInfoService memberInfoService;
     private final MemberDeleteService memberDeleteService;
 
     @PostMapping("/join")
@@ -116,7 +122,7 @@ public class MemberController {
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/delete/{seq}")
     public JSONData delete(@PathVariable Long seq) {
-        Member member = memberDeleteService.delete(seq);
+        Member member = memberDeleteService.userDelete(seq);
         return new JSONData(member);
     }
 
@@ -131,13 +137,17 @@ public class MemberController {
         update.setMode("edit");
         updateValidator.validate(update, errors);
 
+
+        System.out.println("email : " + update.getEmail());
+
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
 
-        // 이제 여기 수정 넣으면 됨. 더 추가될거 있으면 추가하면됨.
+        Member member = updateService.process(update);
 
-        return null;
+
+        return new JSONData(member);
     }
 
     /**
@@ -146,17 +156,18 @@ public class MemberController {
      * @return
      */
     @PatchMapping("/password")
-    public JSONData password(@RequestBody @Valid RequestUpdate update, Errors errors) {
-        update.setMode("change");
-        updateValidator.validate(update, errors);
+    public JSONData password(@RequestBody @Valid RequestPassword update, Errors errors) {
+        passwordValidator.validate(update, errors);
 
+        RequestUpdate requestUpdate = modelMapper.map(update, RequestUpdate.class);
+        requestUpdate.setMode("password");
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
 
-        // 수정처리 ㄱㄱ
+        Member member = updateService.process(requestUpdate);
 
-        return null;
+        return new JSONData(member);
     }
 
     /*********** 강사님추가 S  *************/

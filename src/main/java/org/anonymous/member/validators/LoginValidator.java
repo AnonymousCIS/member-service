@@ -45,14 +45,14 @@ public class LoginValidator implements Validator {
 
         // 존재하지 않는 회원
         if (member == null) {
-
+            System.out.println("존재하지않는거니");
             errors.reject("Mismatch.login");
             return;
         }
 
         // 비밀번호 불일치
         if (!passwordEncoder.matches(password, member.getPassword())) {
-
+            System.out.println("비밀번호가 맞지 않는거니");
             errors.reject("Mismatch.login");
             return;
         }
