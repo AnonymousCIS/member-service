@@ -17,13 +17,13 @@ import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.repositories.MemberStatusRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Lazy
 @Service
@@ -95,9 +95,8 @@ public class MemberStatusUpdateService {
         }
 
         member.setMemberCondition(MemberCondition.BLOCK);
-        String token = utils.getAuthToken();
         HttpHeaders headers = new HttpHeaders();
-        if (StringUtils.hasText(token)) headers.setBearerAuth(token);
+        if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
         HttpEntity<RequestStatus> request = new HttpEntity<>(headers);
         String apiUrl = utils.serviceUrl("board-service", "/admin/block/" + email);
         ResponseEntity<RequestStatus> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, RequestStatus.class);

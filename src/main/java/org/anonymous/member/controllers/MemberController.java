@@ -1,6 +1,11 @@
 package org.anonymous.member.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -51,6 +56,24 @@ public class MemberController {
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
+    @Operation(summary = "회원 가입", method = "POST")
+    @ApiResponse(responseCode = "201", description = "회원가입 성공 시 201")
+    @Parameters({
+            @Parameter(name = "email", required = true, description = "이메일"),
+            @Parameter(name = "name", required = true, description = "이름"),
+            @Parameter(name = "password", required = true, description = "비밀번호"),
+            @Parameter(name = "confirmPassword", required = true, description = "비밀번호 확인"),
+            @Parameter(name = "zipCode", required = true, description = "우편번호"),
+            @Parameter(name = "address", required = true, description = "집주소"),
+            @Parameter(name = "addressSub", description = "나머지주소"),
+            @Parameter(name = "phoneNumber", required = true, description = "휴대폰번호"),
+            @Parameter(name = "requiredTerms1", required = true, description = "필수 약관 동의 여부1"),
+            @Parameter(name = "requiredTerms2", required = true, description = "필수 약관 동의 여부2"),
+            @Parameter(name = "requiredTerms3", required = true, description = "필수 약관 동의 여부3"),
+            @Parameter(name = "optionalTerms", description = "선택 약관 동의 여부"),
+            @Parameter(name = "gender", required = true, description = "성별"),
+            @Parameter(name = "birthDt", required = true, description = "생년월일", examples =  @ExampleObject(name="birthDt", value = "1994-01-04")),
+    })
     public void join(@RequestBody @Valid RequestJoin form, Errors errors) {
 
         joinValidator.validate(form, errors);
@@ -69,6 +92,12 @@ public class MemberController {
      * @param errors
      */
     @PostMapping("/login")
+    @Operation(summary = "인증 및 토큰 발급 후 로그인", method = "POST")
+    @ApiResponse(responseCode = "200", description = "로그인 성공 시 200")
+    @Parameters({
+            @Parameter(name = "email", required = true, description = "이메일"),
+            @Parameter(name = "password", required = true, description = "비밀번호"),
+    })
     public JSONData login(@RequestBody @Valid RequestLogin form, Errors errors, HttpServletResponse response) {
 
         loginValidator.validate(form, errors);
@@ -108,6 +137,8 @@ public class MemberController {
      *
      * @return
      */
+    @Operation(summary = "인증(로그인)한 회원 정보 조회", method = "GET")
+    @ApiResponse(responseCode = "200", description = "로그인 한 회원 정보 조회")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/")
     public JSONData info(@AuthenticationPrincipal MemberInfo memberInfo) {
@@ -119,6 +150,8 @@ public class MemberController {
      * 회원 탈퇴. 진짜 지우는게 아니라 deleteAt 업데이트만 하면 됨.
      * @return
      */
+    @Operation(summary = "회원 탈퇴", method = "PATCH")
+    @ApiResponse(responseCode = "200", description = "회원 탈퇴. 실제로 DB 내에서는 지워지는게 아님.")
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/delete/{seq}")
     public JSONData delete(@PathVariable Long seq) {
@@ -130,6 +163,23 @@ public class MemberController {
      * 회원 정보 수정
      * @return
      */
+    @Operation(summary = "회원 정보 수정", method = "Patch")
+    @ApiResponse(responseCode = "200", description = "수정 완료 됬을 시 200")
+    @Parameters({
+            @Parameter(name = "email", required = true, description = "이메일"),
+            @Parameter(name = "password", description = "비밀번호"),
+            @Parameter(name = "confirmPassword", description = "비밀번호 확인"),
+            @Parameter(name = "zipCode", required = true, description = "우편번호"),
+            @Parameter(name = "address", required = true, description = "집주소"),
+            @Parameter(name = "addressSub", description = "나머지주소"),
+            @Parameter(name = "phoneNumber", required = true, description = "휴대폰번호"),
+            @Parameter(name = "optionalTerms", description = "선택 약관 동의 여부"),
+            @Parameter(name = "authorities", description = "유저 권한.", examples = @ExampleObject(
+                    name="authorities", value = "{USER,ADMIN}"
+            )),
+            @Parameter(name = "mode", description = "edit", examples = @ExampleObject(
+                    name="mode", value = "edit", description = "수정이면 edit, 패스워드 찾기면 password")),
+    })
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/edit")
     public JSONData edit(@RequestBody @Valid RequestUpdate update, Errors errors) {
@@ -155,6 +205,15 @@ public class MemberController {
      * @param update
      * @return
      */
+    @Operation(summary = "회원 정보 수정", method = "PATCH")
+    @ApiResponse(responseCode = "200", description = "수정 완료 됬을 시 200")
+    @Parameters({
+            @Parameter(name = "email", required = true, description = "이메일"),
+            @Parameter(name = "password", required = true, description = "비밀번호"),
+            @Parameter(name = "confirmPassword", required = true, description = "비밀번호 확인"),
+            @Parameter(name = "mode", description = "password", examples = @ExampleObject(
+                    name="mode", value = "edit", description = "수정이면 edit, 패스워드 찾기면 password")),
+    })
     @PatchMapping("/password")
     public JSONData password(@RequestBody @Valid RequestPassword update, Errors errors) {
         passwordValidator.validate(update, errors);
@@ -171,6 +230,8 @@ public class MemberController {
     }
 
     /*********** 강사님추가 S  *************/
+    @Operation(summary = "회원 조회", method = "GET")
+    @ApiResponse(responseCode = "200", description = "회원 조회, Member 객체를 return 해준다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/info/{email}")
     public JSONData info(@PathVariable("email") String email) {
@@ -185,6 +246,8 @@ public class MemberController {
         return new JSONData(member);
     }
 
+    @Operation(summary = "회원 유무 판단", method = "GET")
+    @ApiResponse(responseCode = "200", description = "회원 유무 판단, boolean 값으로 return 해준다.")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/exists/{email}")
     public ResponseEntity<Void> exists(@PathVariable("email") String email) {
