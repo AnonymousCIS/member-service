@@ -1,28 +1,20 @@
 package org.anonymous.member.controllers;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import org.anonymous.member.constants.Gender;
+import org.anonymous.member.constants.Authority;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class RequestJoin {
-
-    @Email
-    @NotBlank
-    private String email;
+public class RequestUpdate {
 
     @NotBlank
-    private String name; // 회원명
+    private String email; // 절대 바뀌면 안됨. 그냥 값만 먼저 받고 Member 확인용으로 하려고 하는거
 
-    @Size(min=8, max=40)
-    @NotBlank
     private String password;
 
-    @NotBlank
     private String confirmPassword;
 
     @NotBlank
@@ -36,23 +28,11 @@ public class RequestJoin {
     @NotBlank
     private String phoneNumber;
 
-    // 필수 약관 동의 여부
-    @AssertTrue
-    private boolean requiredTerms1;
-
-    @AssertTrue
-    private boolean requiredTerms2;
-
-    @AssertTrue
-    private boolean requiredTerms3;
-
     // 선택 약관 동의 여부 - 문구 입력
     // 선택 약관은 어떤 약관을 체크했는지 구분할 수 있어야 함
     private List<String> optionalTerms;
 
-    @NotNull
-    private Gender gender;
+    private List<Authority> authorities;
 
-    @NotNull
-    private LocalDate birthDt;
+    private String mode;
 }

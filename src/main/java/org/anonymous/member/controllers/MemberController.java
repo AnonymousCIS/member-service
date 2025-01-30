@@ -1,5 +1,6 @@
 package org.anonymous.member.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -8,35 +9,45 @@ import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
 import org.anonymous.global.rests.JSONData;
 import org.anonymous.member.MemberInfo;
+import org.anonymous.member.entities.Member;
 import org.anonymous.member.jwt.TokenService;
+import org.anonymous.member.repositories.MemberRepository;
+import org.anonymous.member.services.MemberDeleteService;
+import org.anonymous.member.services.MemberInfoService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
+import org.anonymous.member.validators.PasswordValidator;
+import org.anonymous.member.validators.UpdateValidator;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Member", description = "회원 인증/인가 API")
+@Tag(name = "Member", description = "회원 인증/인가/정보수정 API")
 @RestController
 @RequiredArgsConstructor
 public class MemberController {
 
     @Value("${front.domain}")
-    private  String frontDomain;
+    private String frontDomain;
 
     private final Utils utils;
-
+    private final ModelMapper modelMapper;
     private final TokenService tokenService;
-
     private final JoinValidator joinValidator;
-
     private final LoginValidator loginValidator;
-
+    private final UpdateValidator updateValidator;
     private final MemberUpdateService updateService;
+    private final MemberRepository memberRepository;
+    private final PasswordValidator passwordValidator;
+    private final MemberInfoService memberInfoService;
+    private final MemberDeleteService memberDeleteService;
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
@@ -97,11 +108,90 @@ public class MemberController {
      *
      * @return
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/")
     public JSONData info(@AuthenticationPrincipal MemberInfo memberInfo) {
 
         return new JSONData(memberInfo.getMember());
     }
+
+    /**
+     * 회원 탈퇴. 진짜 지우는게 아니라 deleteAt 업데이트만 하면 됨.
+     * @return
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/delete/{seq}")
+    public JSONData delete(@PathVariable Long seq) {
+        Member member = memberDeleteService.userDelete(seq);
+        return new JSONData(member);
+    }
+
+    /**
+     * 회원 정보 수정
+     * @return
+     */
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/edit")
+    public JSONData edit(@RequestBody @Valid RequestUpdate update, Errors errors) {
+
+        update.setMode("edit");
+        updateValidator.validate(update, errors);
+
+
+        System.out.println("email : " + update.getEmail());
+
+        if(errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
+        Member member = updateService.process(update);
+
+
+        return new JSONData(member);
+    }
+
+    /**
+     * 비밀번호 찾기 후 수정.
+     * @param update
+     * @return
+     */
+    @PatchMapping("/password")
+    public JSONData password(@RequestBody @Valid RequestPassword update, Errors errors) {
+        passwordValidator.validate(update, errors);
+
+        RequestUpdate requestUpdate = modelMapper.map(update, RequestUpdate.class);
+        requestUpdate.setMode("password");
+        if(errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
+        Member member = updateService.process(requestUpdate);
+
+        return new JSONData(member);
+    }
+
+    /*********** 강사님추가 S  *************/
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/info/{email}")
+    public JSONData info(@PathVariable("email") String email) {
+        Member member = null;
+        try {
+            Long seq = Long.valueOf(email);
+            member = memberInfoService.get(seq);
+        } catch (Exception e) {
+            // 이메일
+            member = memberInfoService.get(email);
+        }
+        return new JSONData(member);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/exists/{email}")
+    public ResponseEntity<Void> exists(@PathVariable("email") String email) {
+        HttpStatus status = memberRepository.exists(email) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status).build();
+    }
+    /*********** 강사님추가 E  *************/
 
     // 회원 전용 접근 테스트
     @PreAuthorize("isAuthenticated()")

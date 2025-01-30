@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.anonymous.member.jwt.filters.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -50,17 +51,14 @@ public class SecurityConfig {
                 .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
                 // 인증 실패 예외 발생시
                 .exceptionHandling(c -> {
-
                     // 미로그인 상태에서 접근한 경우
                     c.authenticationEntryPoint((req, res, e) -> {
-
                        // throw new UnAuthorizedException();
                         res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     });
 
                     // 로그인 후 권한이 없는 경우
                     c.accessDeniedHandler((req, res, e) -> {
-
                       // throw new UnAuthorizedException();
                         res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     });
@@ -68,13 +66,27 @@ public class SecurityConfig {
                 // 미로그인시 접근 가능한 패턴
                 .authorizeHttpRequests( c -> {
 
+                    /**
+                     * 접근 제한 통제 설정.
+                     * authenticated() : 인증받은 사용자만 접근.
+                     * anonymous() : 인증받지 않은 사용자만 접근.
+                     * permitAll() : 모든 사용자가 접근 가능.
+                     * hasAuthority("권한 명칭") : 하나의 권한을 체크
+                     * hasAnyAuthority("권한1", "권한2", ... ) : 나열된 권한 중 하나라도 충족하면 접근 가능
+                     * ROLE
+                     * ROLE_명칭
+                     * hasRole("명칭")
+                     * hasAnyRole(...)
+                     */
                       // 미로그인도 즉, 전체 접근 가능 패턴
-                    c.requestMatchers("/join", // GateWay 연동시 /api/v1/member/join 예정
-                                    "/login",
-                                    "/apidocs/html",
-                                    "/swagger-ui*/**",
-                                    "/api-docs/**").permitAll()
 
+                    c.requestMatchers(
+                                    "/join", // GateWay 연동시 /api/v1/member/join 예정
+                                    "/login",
+                                    "/password",
+                                    "/apidocs.html",
+                                    "/swagger-ui/**",
+                                    "/api-docs/**").permitAll()
                             // 관리자만 접근 가능 패턴
                             .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
 

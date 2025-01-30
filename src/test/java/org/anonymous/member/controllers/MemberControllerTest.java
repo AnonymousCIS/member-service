@@ -1,7 +1,9 @@
-package onedu.blue.member.controllers;
+package org.anonymous.member.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.anonymous.member.controllers.RequestJoin;
+import org.anonymous.member.controllers.RequestLogin;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ public class MemberControllerTest {
 
     @Autowired
     private ObjectMapper om;
+
+    // region 회원가입 & 로그인 테스트
 
     @Test
     @DisplayName("회원가입 & 로그인 테스트")
@@ -78,7 +82,38 @@ public class MemberControllerTest {
         mockMvc.perform(get("/test")
                 .header("Authorization", "Bearer " + token))
                 .andDo(print());
-
-
     }
+
+    // endregion
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

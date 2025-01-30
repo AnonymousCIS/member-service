@@ -51,7 +51,7 @@ public interface PasswordValidator {
      * @param password
      * @return
      */
-    default boolean specialCharscehk(String password) {
+    default boolean specialCharsCheck(String password) {
 
         // 숫자 & Alphabet & 한글 제외한 모든 문자 = 특수 문자
         String pattern = ".*[^0-9a-zA-Zㄱ-ㅎ가-힣].*";

@@ -1,12 +1,14 @@
 package org.anonymous.member.validators;
 
 import lombok.RequiredArgsConstructor;
+import org.anonymous.member.constants.MemberCondition;
 import org.anonymous.member.controllers.RequestLogin;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.repositories.MemberRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -45,16 +47,24 @@ public class LoginValidator implements Validator {
 
         // 존재하지 않는 회원
         if (member == null) {
-
             errors.reject("Mismatch.login");
             return;
         }
 
         // 비밀번호 불일치
         if (!passwordEncoder.matches(password, member.getPassword())) {
-
             errors.reject("Mismatch.login");
             return;
         }
+
+        if (member.getMemberCondition() == MemberCondition.BLOCK) { // 블락확인.
+            errors.reject("Member.blocked");
+            return;
+        }
+
+        if (member.getDeletedAt() != null) { // 탈퇴된 멤버.
+            errors.reject("Failure.disabled.login");
+        }
+
     }
 }

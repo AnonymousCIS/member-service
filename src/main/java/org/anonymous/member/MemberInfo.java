@@ -2,12 +2,14 @@ package org.anonymous.member;
 
 import lombok.Builder;
 import lombok.Data;
+import org.anonymous.member.constants.Authority;
 import org.anonymous.member.entities.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * UserDetails Interface - DTO
@@ -20,12 +22,11 @@ import java.util.Collection;
 public class MemberInfo implements UserDetails {
 
     private String email;
-
     private String password;
-
     private Collection<? extends GrantedAuthority> authorities;
-
     private Member member;
+    private List<Authority> _authorities;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -46,18 +47,18 @@ public class MemberInfo implements UserDetails {
         return email;
     }
 
-    // Account 만료 여부
+    // Account 만료 여부 -> 휴면여부 체크 하면 됨
     @Override
     public boolean isAccountNonExpired() {
 
         return true;
     }
 
-    // Account 잠김 여부
+    // Account 잠김 여부 -> deleteAt 체크 하면 됨.
     @Override
     public boolean isAccountNonLocked() {
 
-        return true;
+        return member.getDeletedAt() != null;
     }
 
     // 비밀번호 만료 여부
