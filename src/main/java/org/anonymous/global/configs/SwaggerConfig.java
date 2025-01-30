@@ -14,14 +14,14 @@ import org.springframework.context.annotation.Configuration;
  */
 // 제목 & 설명
 @Configuration
-@OpenAPIDefinition(info = @Info(title = "회원 인증/인가 API", description = "회원 가입 및 로그인, 회원 인가 체크에 대한 API 제공"))
+@OpenAPIDefinition(info = @Info(title = "회원 인증인가 API", description = "회원 가입 및 로그인, 회원 인가 체크에 대한 API 제공"))
 public class SwaggerConfig {
 
     @Bean
     public GroupedOpenApi openApiGroup() {
 
         return GroupedOpenApi.builder()
-                .group("회원 인증/인가 API v1") // Group 이름 -> group("설명")
+                .group("회원 인증 인가 API v1") // Group 이름 -> group("설명")
                 .pathsToMatch("/**") // 경로 패턴 지정 (api 문서에 속하는 모든 경로)
                 .build();
     }

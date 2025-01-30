@@ -1,14 +1,17 @@
 package org.anonymous.member.controllers;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
 import org.anonymous.global.paging.ListData;
 import org.anonymous.global.rests.JSONData;
+import org.anonymous.member.constants.DomainStatus;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.MemberStatus;
 import org.anonymous.member.services.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,29 +31,30 @@ public class AdminMemberController {
     private final MemberStatusInfoService memberStatusInfoService;
     private final MemberStatusUpdateService memberStatusUpdateService;
 
-    /**
-     * 회원 단일 조회
-     * @return
-     */
-    @GetMapping("/info/{email}")
-    public JSONData info(@PathVariable("email") String email) {
-        Member member = null;
-        try {
-            Long seq = Long.valueOf(email);
-            member = memberInfoService.get(seq);
-        } catch (Exception e) {
-            // 이메일
-            member = memberInfoService.get(email);
-        }
-        return new JSONData(member);
-    }
+//    /**
+//     * 회원 단일 조회
+//     * 사실 여기에 필요가 없을거같은데..
+//     * @return
+//     */
+//    @GetMapping("/info/{email}")
+//    public JSONData info(@PathVariable("email") String email) {
+//        Member member = null;
+//        try {
+//            Long seq = Long.valueOf(email);
+//            member = memberInfoService.get(seq);
+//        } catch (Exception e) {
+//            // 이메일
+//            member = memberInfoService.get(email);
+//        }
+//        return new JSONData(member);
+//    }
 
     /**
      * 회원 목록 조회
      * @return
      */
     @GetMapping("/list")
-    public JSONData list(MemberSearch search) {
+    public JSONData list(@ModelAttribute MemberSearch search) {
         ListData<Member> memberList = memberInfoService.getList(search);
         return new JSONData(memberList);
     }
@@ -101,6 +105,7 @@ public class AdminMemberController {
 
     /**
      * 회원 수정 업데이트 처리
+     * 얘도 필요없을듯..?
      * @return
      */
     @PatchMapping("/update")
@@ -109,8 +114,6 @@ public class AdminMemberController {
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
-
-
         Member member = memberUpdateService.process(update);
         return new JSONData(member);
     }
@@ -120,9 +123,39 @@ public class AdminMemberController {
      * @param seq
      * @return
      */
-    public JSONData delete(Long seq) {
-
+    @DeleteMapping("/delete/{seq}")
+    public JSONData delete(@PathVariable("seq") Long seq) {
+        System.out.println("Controller 안녕1");
         Member member = memberDeleteService.delete(seq);
+        System.out.println("Controller 안녕2");
         return new JSONData(member);
+    }
+
+    /**
+     * 단일 관리자 차단 도메인별로 차단해야할듯.
+     * @return
+     */
+    @PatchMapping("/block/{email}")
+    public JSONData block(@PathVariable("email") String email) {
+        Member member = memberStatusUpdateService.statusBlock(email);
+        return new JSONData(member);
+    }
+
+    @PatchMapping("/blocks")
+    public JSONData blocks(@RequestBody List<String> emails) {
+        List<Member> members = memberStatusUpdateService.statusBlocks(emails);
+        return new JSONData(members);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping("/unblock")
+    public void unblock(@RequestParam String email, @RequestParam DomainStatus status) {
+        memberStatusUpdateService.statusUnblock(email, status);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping("/unblocks")
+    public void unblocks(@RequestBody List<String> emails, @RequestParam DomainStatus status) {
+        memberStatusUpdateService.statusUnblocks(emails, status);
     }
 }

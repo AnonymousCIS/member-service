@@ -3,7 +3,7 @@ package org.anonymous.member.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.anonymous.global.entities.MemberBaseEntity;
-import org.anonymous.member.constants.MemberDomainStatus;
+import org.anonymous.member.constants.DomainStatus;
 
 @Data
 @Entity
@@ -15,7 +15,7 @@ public class MemberStatus extends MemberBaseEntity {
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    private MemberDomainStatus memberStatus;
+    private DomainStatus memberStatus;
 
     @Id
     private String type;

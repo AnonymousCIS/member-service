@@ -1,14 +1,14 @@
 package org.anonymous.member.controllers;
 
 import lombok.Data;
-import org.anonymous.member.constants.MemberDomainStatus;
+import org.anonymous.member.constants.DomainStatus;
 
 @Data
 public class RequestStatus {
 
     private String email;
 
-    private MemberDomainStatus status;
+    private DomainStatus status;
 
     private String type;
 

@@ -47,18 +47,18 @@ public class MemberInfo implements UserDetails {
         return email;
     }
 
-    // Account 만료 여부
+    // Account 만료 여부 -> 휴면여부 체크 하면 됨
     @Override
     public boolean isAccountNonExpired() {
 
         return true;
     }
 
-    // Account 잠김 여부
+    // Account 잠김 여부 -> deleteAt 체크 하면 됨.
     @Override
     public boolean isAccountNonLocked() {
 
-        return true;
+        return member.getDeletedAt() != null;
     }
 
     // 비밀번호 만료 여부

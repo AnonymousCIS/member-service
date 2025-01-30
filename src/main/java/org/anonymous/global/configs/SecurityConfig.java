@@ -51,24 +51,20 @@ public class SecurityConfig {
                 .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
                 // 인증 실패 예외 발생시
                 .exceptionHandling(c -> {
-                    System.out.println("안녕1");
                     // 미로그인 상태에서 접근한 경우
                     c.authenticationEntryPoint((req, res, e) -> {
-                        System.out.println("안녕2");
                        // throw new UnAuthorizedException();
                         res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     });
 
                     // 로그인 후 권한이 없는 경우
                     c.accessDeniedHandler((req, res, e) -> {
-                        System.out.println("안녕3");
                       // throw new UnAuthorizedException();
                         res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     });
                 })
                 // 미로그인시 접근 가능한 패턴
                 .authorizeHttpRequests( c -> {
-                    System.out.println("안녕4");
 
                     /**
                      * 접근 제한 통제 설정.
@@ -83,14 +79,14 @@ public class SecurityConfig {
                      * hasAnyRole(...)
                      */
                       // 미로그인도 즉, 전체 접근 가능 패턴
+
                     c.requestMatchers(
                                     "/join", // GateWay 연동시 /api/v1/member/join 예정
                                     "/login",
                                     "/password",
                                     "/apidocs.html",
-                                    "/swagger-ui*/**",
+                                    "/swagger-ui/**",
                                     "/api-docs/**").permitAll()
-
                             // 관리자만 접근 가능 패턴
                             .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
 

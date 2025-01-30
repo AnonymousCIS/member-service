@@ -1,6 +1,6 @@
 package org.anonymous.member.constants;
 
-public enum MemberDomainStatus {
+public enum DomainStatus {
     ALL,
     SECRET,
     BLOCK,

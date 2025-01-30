@@ -2,6 +2,7 @@ package org.anonymous.member.services;
 
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -9,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.anonymous.global.paging.ListData;
 import org.anonymous.global.paging.Pagination;
-import org.anonymous.member.constants.MemberDomainStatus;
+import org.anonymous.member.constants.DomainStatus;
 import org.anonymous.member.controllers.MemberStatusSearch;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.MemberStatus;
@@ -77,7 +78,6 @@ public class MemberStatusInfoService {
             } else {
                 condition = qMemberStatus.member.name.concat(qMemberStatus.type);
             }
-
             andBuilder.and(condition.contains(skey));
         }
 
@@ -104,7 +104,7 @@ public class MemberStatusInfoService {
 
         // region block 검색
 
-        List<MemberDomainStatus> domainStatuses = search.getDomainStatuses();
+        List<DomainStatus> domainStatuses = search.getDomainStatuses();
         if (domainStatuses != null && !domainStatuses.isEmpty()) {
             andBuilder.and(qMemberStatus.memberStatus.in(domainStatuses));
         }
@@ -146,6 +146,14 @@ public class MemberStatusInfoService {
         return new ListData<>(items, pagination);
 
         // endregion
+    }
+
+    public List<MemberStatus> getStatus(String type) {
+        QMemberStatus ms = QMemberStatus.memberStatus1;
+
+        return queryFactory.selectFrom(ms)
+                .where(ms.type.eq(type))
+                .fetch();
     }
 }
 
