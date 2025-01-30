@@ -7,7 +7,9 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+
 
 /**
  * 공용으로 많이 쓰일
@@ -21,8 +23,7 @@ public class BeansConfig {
     @Lazy
     @Bean
     public RestTemplate restTemplate() {
-
-        return new RestTemplate();
+        return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
     }
 
     /**

@@ -95,11 +95,9 @@ public class Utils {
             List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
             String profile = System.getenv("spring.profiles.active");
             boolean isDev = StringUtils.hasText(profile) && profile.contains("dev");
-            System.out.println("isDev: " + isDev);
             String serviceUrl = null;
             for (ServiceInstance instance : instances) {
                 String uri = instance.getUri().toString();
-                System.out.println("uri:" + uri);
                 if (isDev && uri.contains("localhost")) {
                     serviceUrl = uri;
                 } else if (!isDev && !uri.contains("localhost")) {
@@ -108,7 +106,6 @@ public class Utils {
             }
 
             if (StringUtils.hasText(serviceUrl)) {
-                System.out.println(serviceUrl + url);
                 return serviceUrl + url;
             }
         } catch (Exception e) {
