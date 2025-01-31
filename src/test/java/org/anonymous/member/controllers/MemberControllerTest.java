@@ -2,9 +2,9 @@ package org.anonymous.member.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.anonymous.member.annotations.MockMember;
+import org.anonymous.member.constants.Authority;
 import org.anonymous.member.constants.DomainStatus;
-import org.anonymous.member.controllers.RequestJoin;
-import org.anonymous.member.controllers.RequestLogin;
 import org.anonymous.member.jwt.TokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,15 +19,15 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
-@ActiveProfiles({"default", "jwt"})
+// @ActiveProfiles({"default", "jwt"})
 @AutoConfigureMockMvc
 @Transactional
 public class MemberControllerTest {
@@ -124,6 +124,26 @@ public class MemberControllerTest {
 
         ResponseEntity<String> response = restTemplate.exchange(URI.create("http://localhost:3011/admin/status"), HttpMethod.PATCH, request, String.class);
         System.out.println(response);
+    }
+
+    @Test
+    @MockMember(authority = {Authority.ADMIN, Authority.USER})
+    void blockTest2() throws Exception {
+        String token = tokenService.create("user02@test.org");
+
+        mockMvc.perform(patch("/admin/block/user04@test.org")
+                .header("Authorization", "Bearer " + token))
+                .andDo(print());
+    }
+
+    @Test
+    @MockMember(authority = {Authority.ADMIN, Authority.USER})
+    void unblockTest() throws Exception {
+        String token = tokenService.create("user02@test.org");
+
+        mockMvc.perform(patch("/admin/unblock?email=user04@test.org&status=ALL")
+                        .header("Authorization", "Bearer " + token))
+                .andDo(print());
     }
 
 }

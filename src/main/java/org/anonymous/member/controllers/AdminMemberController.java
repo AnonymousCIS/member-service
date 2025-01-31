@@ -125,9 +125,7 @@ public class AdminMemberController {
      */
     @DeleteMapping("/delete/{seq}")
     public JSONData delete(@PathVariable("seq") Long seq) {
-        System.out.println("Controller 안녕1");
         Member member = memberDeleteService.delete(seq);
-        System.out.println("Controller 안녕2");
         return new JSONData(member);
     }
 
@@ -149,13 +147,13 @@ public class AdminMemberController {
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/unblock")
-    public void unblock(@RequestParam String email, @RequestParam DomainStatus status) {
+    public void unblock(@RequestParam("email") String email, @RequestParam("status") DomainStatus status) {
         memberStatusUpdateService.statusUnblock(email, status);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/unblocks")
-    public void unblocks(@RequestBody List<String> emails, @RequestParam DomainStatus status) {
+    public void unblocks(@RequestBody List<String> emails, @RequestParam("status") DomainStatus status) {
         memberStatusUpdateService.statusUnblocks(emails, status);
     }
 }
