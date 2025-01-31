@@ -2,18 +2,22 @@ package org.anonymous.member.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.anonymous.member.constants.DomainStatus;
 import org.anonymous.member.controllers.RequestJoin;
 import org.anonymous.member.controllers.RequestLogin;
+import org.anonymous.member.jwt.TokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest
-@ActiveProfiles({"default", "test", "jwt"})
+@ActiveProfiles({"default", "jwt"})
 @AutoConfigureMockMvc
 @Transactional
 public class MemberControllerTest {
@@ -33,6 +37,12 @@ public class MemberControllerTest {
 
     @Autowired
     private ObjectMapper om;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private TokenService tokenService;
 
     // region 회원가입 & 로그인 테스트
 
@@ -86,6 +96,35 @@ public class MemberControllerTest {
 
     // endregion
 
+    @Test
+    void blockTest() throws Exception {
+        String token = tokenService.create("user02@test.org");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        /**
+         * {
+         *   "email":"user04@test.org",
+         *   "status":"BLOCK",
+         *   "type":"board",
+         *   "seq":"1"
+         * }
+         */
+
+        RequestStatus form = new RequestStatus();
+        form.setEmail("user04@test.org");
+        form.setStatus(DomainStatus.BLOCK);
+        form.setType("board");
+        form.setSeq(2L);
+        String params = om.writeValueAsString(form);
+
+        HttpEntity<String> request = new HttpEntity<>(params, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(URI.create("http://localhost:3011/admin/status"), HttpMethod.PATCH, request, String.class);
+        System.out.println(response);
+    }
 
 }
 

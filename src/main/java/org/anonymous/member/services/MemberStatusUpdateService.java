@@ -42,7 +42,7 @@ public class MemberStatusUpdateService {
         Member member = memberInfoService.get(form.getEmail());
 
         if (member == null) {
-            return null; // 멤버는 무조건 있어야함.
+            throw new MemberNotFoundException();
         }
 
         MemberStatus memberStatus = memberStatus(member, form);
