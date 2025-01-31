@@ -23,8 +23,11 @@ public class BeansConfig {
     @Lazy
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        return restTemplate;
     }
+
 
     /**
      * 커맨드 객체 값 옮겨주는 (GET & SET)
