@@ -12,14 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.*;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -143,7 +140,34 @@ public class MemberControllerTest {
         String token = tokenService.create("user01@test.org");
 
         mockMvc.perform(patch("/admin/unblock?email=user04@test.org&status=ALL")
-                        .header("Authorization", "Bearer " + token))
+                .header("Authorization", "Bearer " + token))
+                .andDo(print());
+    }
+
+    @Test
+    @MockMember(authority = {Authority.ADMIN, Authority.USER})
+    void blocksTest() throws Exception {
+        String token = tokenService.create("user01@test.org");
+        List<String> memberList = List.of("user10@test.org", "user11@test.org");
+
+        mockMvc.perform(patch("/admin/blocks")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Content-Type", "application/json")
+                        .content(om.writeValueAsString(memberList)))
+                .andDo(print());
+    }
+
+    @Test
+    @MockMember(authority = {Authority.ADMIN, Authority.USER})
+    void unblocksTest() throws Exception {
+        String token = tokenService.create("user01@test.org");
+        List<String> memberList = List.of("user10@test.org", "user11@test.org", "user04@test.org");
+
+        mockMvc.perform(patch("/admin/unblocks")
+                        .header("Authorization", "Bearer " + token)
+                        .content(om.writeValueAsString(memberList))
+                        .param("status", String.valueOf(DomainStatus.ALL))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
     }
 

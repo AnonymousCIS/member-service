@@ -229,4 +229,19 @@ public class Utils {
             return Objects.hash(ip, ua);
         }
     }
+
+    /**
+     * 사용자 구분을 위한 해시값 조회
+     */
+    public String getUserHash(){
+        String userKey = "" + Objects.hash("userHash");
+
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies){
+            if (cookie.getName().equals(userKey)){
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
 }

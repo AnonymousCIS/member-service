@@ -19,6 +19,7 @@ import org.anonymous.member.jwt.TokenService;
 import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.services.MemberDeleteService;
 import org.anonymous.member.services.MemberInfoService;
+import org.anonymous.member.services.MemberPasswordSendService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
@@ -53,6 +54,7 @@ public class MemberController {
     private final PasswordValidator passwordValidator;
     private final MemberInfoService memberInfoService;
     private final MemberDeleteService memberDeleteService;
+    private final MemberPasswordSendService memberPasswordSendService;
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
@@ -198,6 +200,22 @@ public class MemberController {
 
 
         return new JSONData(member);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @GetMapping("/send/{to}")
+    public void passwordSend(@PathVariable("to") String to) {
+        if (!memberPasswordSendService.sendEmail(to)) {
+            throw new BadRequestException(utils.getMessage("Member.password.send"));
+        }
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @GetMapping("/verify")
+    public void passwordVerify(@RequestParam(name="authCode", required = false) Integer authCode) {
+        if (!memberPasswordSendService.sendVerify(authCode)) {
+            throw new BadRequestException(utils.getMessage("Member.password.verify"));
+        }
     }
 
     /**
