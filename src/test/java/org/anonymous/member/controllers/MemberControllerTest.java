@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @SpringBootTest
 // @ActiveProfiles({"default", "jwt"})
 @AutoConfigureMockMvc
-@Transactional
 public class MemberControllerTest {
 
     @Autowired
@@ -98,7 +97,7 @@ public class MemberControllerTest {
 
     @Test
     void blockTest() throws Exception {
-        String token = tokenService.create("user02@test.org");
+        String token = tokenService.create("user01@test.org");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -129,7 +128,9 @@ public class MemberControllerTest {
     @Test
     @MockMember(authority = {Authority.ADMIN, Authority.USER})
     void blockTest2() throws Exception {
-        String token = tokenService.create("user02@test.org");
+        String token = tokenService.create("user01@test.org");
+
+        System.out.println("token : " + token);
 
         mockMvc.perform(patch("/admin/block/user04@test.org")
                 .header("Authorization", "Bearer " + token))
@@ -139,7 +140,7 @@ public class MemberControllerTest {
     @Test
     @MockMember(authority = {Authority.ADMIN, Authority.USER})
     void unblockTest() throws Exception {
-        String token = tokenService.create("user02@test.org");
+        String token = tokenService.create("user01@test.org");
 
         mockMvc.perform(patch("/admin/unblock?email=user04@test.org&status=ALL")
                         .header("Authorization", "Bearer " + token))

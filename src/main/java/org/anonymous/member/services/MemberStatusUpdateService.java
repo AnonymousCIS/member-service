@@ -99,6 +99,7 @@ public class MemberStatusUpdateService {
         if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
         HttpEntity<Void> request = new HttpEntity<>(headers);
         String apiUrl = utils.serviceUrl("board-service", "/admin/block/" + email);
+        System.out.println(apiUrl);
         ResponseEntity<Void> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, Void.class);
 
         if (item.getStatusCode() != HttpStatus.NO_CONTENT) {
