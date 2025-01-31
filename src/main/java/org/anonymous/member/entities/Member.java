@@ -55,6 +55,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private LocalDate birthDt;
 
+    @Enumerated(EnumType.STRING)
     private MemberCondition memberCondition;
 
     @JsonIgnore // 순환 참조 발생 방지용

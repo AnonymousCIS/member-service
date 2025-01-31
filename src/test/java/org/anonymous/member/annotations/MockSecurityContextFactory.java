@@ -1,6 +1,8 @@
 package org.anonymous.member.annotations;
 
 import org.anonymous.member.MemberInfo;
+import org.anonymous.member.constants.Authority;
+import org.anonymous.member.entities.Authorities;
 import org.anonymous.member.entities.Member;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -17,6 +19,7 @@ public class MockSecurityContextFactory implements WithSecurityContextFactory<Mo
         member.setEmail(annotation.email());
         member.setSeq(annotation.seq());
         member.setName(annotation.name());
+        member.setAuthorities(List.of(Authorities.builder().member(member).authority(Authority.USER).build()));
 /*        member.setAuthorities(Arrays.stream(annotation.authority()))*/
         MemberInfo _member = MemberInfo.builder().member(member)._authorities(List.of(annotation.authority()))
                 .email(member.getEmail()).build();

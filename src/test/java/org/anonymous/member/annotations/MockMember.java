@@ -13,8 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = MockSecurityContextFactory.class)
 public @interface MockMember {
-    long seq() default 1L;
+    long seq() default 10L;
     String email() default "user01@test.org";
     String name() default "사용자01";
-    Authority authority() default Authority.USER;
+    Authority[] authority() default {Authority.USER};
 }
