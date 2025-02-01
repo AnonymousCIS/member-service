@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
 import org.anonymous.global.paging.ListData;
+import org.anonymous.global.rests.JSONData;
 import org.anonymous.member.constants.DomainStatus;
 import org.anonymous.member.constants.MemberCondition;
 import org.anonymous.member.controllers.MemberStatusSearch;
@@ -24,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Lazy
 @Service
@@ -120,28 +122,30 @@ public class MemberStatusUpdateService {
     }
 
     public void statusUnblock(String email, DomainStatus status) {
-
         Member member = memberInfoService.get(email); // 이메일로 해당멤버 확인
         member.setMemberCondition(MemberCondition.ACTIVE); // 멤버 ACTIVE 로 unblock 처리
         List<MemberStatus> memberStatusBoard = memberStatusInfoService.getStatus("board"); // block 되어있는 데이터 다 가져오기
         List<Long> seqBoardList = memberStatusBoard.stream().map(MemberStatus::getSeq).toList(); // 해당 board에 되어있는 seq 다 가져오기
-        String url = "/board/status?seq=";
-        ResponseEntity<RequestStatus> boardItem = addInfo(url, seqBoardList, status);
-
-        if (boardItem.getStatusCode() != HttpStatus.OK) {
-            throw new BadRequestException(utils.getMessage("Member.board.status"));
+        String url = "/status?";
+        if (!seqBoardList.isEmpty()) {
+            ResponseEntity<Void> boardItem = addInfo(url, seqBoardList, status);
+            if (boardItem.getStatusCode() != HttpStatus.OK) {
+                throw new BadRequestException(utils.getMessage("Member.board.status"));
+            }
         }
 
         List<MemberStatus> memberStatusComment = memberStatusInfoService.getStatus("comment"); // block 되어있는 데이터 다 가져오기
         List<Long> seqCommentList = memberStatusComment.stream().map(MemberStatus::getSeq).toList(); // 해당 board에 되어있는 seq 다 가져오기
 
-        url = "/comment/status?seq=";
-        ResponseEntity<RequestStatus> commentItem = addInfo(url, seqCommentList, status);
 
-        if (commentItem.getStatusCode() != HttpStatus.OK) {
-            throw new BadRequestException(utils.getMessage("Member.comment.status"));
+        if (!seqCommentList.isEmpty()) {
+            url = "/comment/status?";
+            ResponseEntity<Void> commentItem = addInfo(url, seqCommentList, status);
+
+            if (commentItem.getStatusCode() != HttpStatus.OK) {
+                throw new BadRequestException(utils.getMessage("Member.comment.status"));
+            }
         }
-
         memberRepository.saveAndFlush(member);
     }
 
@@ -151,12 +155,16 @@ public class MemberStatusUpdateService {
         }
     }
 
-    private ResponseEntity<RequestStatus> addInfo(String url, List<Long> seq, DomainStatus status) {
+    private ResponseEntity<Void> addInfo(String url, List<Long> seq, DomainStatus status) {
         HttpHeaders headers = new HttpHeaders(); // 헤더 생성
         if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
-        HttpEntity<RequestStatus> request = new HttpEntity<>(headers);
-        String apiUrl = utils.serviceUrl("board-service", url + seq + "&status=" + status);
-        ResponseEntity<RequestStatus> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, RequestStatus.class);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        String result = seq.stream()
+                .map(a -> "seq=" + a)
+                .collect(Collectors.joining("&"));
+        String apiUrl = utils.serviceUrl("board-service", url + result + "&status=" + status);
+        ResponseEntity<Void> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, Void.class);
 
         return item;
     }
