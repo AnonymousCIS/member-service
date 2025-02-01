@@ -28,23 +28,19 @@ public class MemberPasswordSendService {
             throw new MemberNotFoundException();
         }
         String url = "/auth/";
-        boolean test = addInfo(url, "send", email, null) == HttpStatus.NO_CONTENT;
-        System.out.println("test : " + test);
-        return test;
+        return addInfo(url, "send", email, null) == HttpStatus.NO_CONTENT;
     }
 
     public boolean sendVerify(Integer code) {
-        String url = "/verify?autoCode=";
+        String url = "/verify?authCode=";
         return addInfo(url,"verify",null, code) == HttpStatus.NO_CONTENT;
     }
 
     public HttpStatusCode addInfo(String url, String mode, String email, Integer code) {
         mode = StringUtils.hasText(mode) ? mode : "verify";
-
         String token = utils.getAuthToken();
         HttpHeaders headers = new HttpHeaders();
         String userKey = "" + Objects.hash("userHash");
-        System.out.println(userKey + " : " + utils.getUserHash());
         headers.set(HttpHeaders.COOKIE, userKey + "=" + utils.getUserHash());
         if (StringUtils.hasText(token)) headers.setBearerAuth(token);
         HttpEntity<String> request = new HttpEntity<>(headers);
@@ -55,9 +51,7 @@ public class MemberPasswordSendService {
         } else {
             apiUrl = utils.serviceUrl("email-service", url + email);
         }
-
         ResponseEntity<Void> item = restTemplate.exchange(apiUrl, HttpMethod.GET, request, Void.class);
-
         return item.getStatusCode();
     }
 }

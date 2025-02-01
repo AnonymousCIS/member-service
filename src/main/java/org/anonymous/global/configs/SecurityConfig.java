@@ -84,6 +84,8 @@ public class SecurityConfig {
                                     "/join", // GateWay 연동시 /api/v1/member/join 예정
                                     "/login",
                                     "/password",
+                                    "/send/**",
+                                    "/verify",
                                     "/apidocs.html",
                                     "/swagger-ui/**",
                                     "/api-docs/**").permitAll()

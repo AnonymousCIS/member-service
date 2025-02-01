@@ -189,9 +189,6 @@ public class MemberController {
         update.setMode("edit");
         updateValidator.validate(update, errors);
 
-
-        System.out.println("email : " + update.getEmail());
-
         if(errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
