@@ -1,14 +1,10 @@
 package org.anonymous.member.services;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
-import org.anonymous.global.paging.ListData;
-import org.anonymous.global.rests.JSONData;
 import org.anonymous.member.constants.DomainStatus;
 import org.anonymous.member.constants.MemberCondition;
-import org.anonymous.member.controllers.MemberStatusSearch;
 import org.anonymous.member.controllers.RequestStatus;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.MemberStatus;
@@ -18,7 +14,6 @@ import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.repositories.MemberStatusRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -65,7 +60,7 @@ public class MemberStatusUpdateService {
         for (RequestStatus form : forms) {
             Member member = memberInfoService.get(form.getEmail());
             if (member == null) {
-                continue; // 동일함. 멤버는 무조건 있어야하기에...
+                throw new MemberNotFoundException();
             }
             MemberStatus memberStatus = memberStatus(member, form);
             memberStatus.setMember(member);
@@ -97,15 +92,16 @@ public class MemberStatusUpdateService {
         }
 
         member.setMemberCondition(MemberCondition.BLOCK);
-        HttpHeaders headers = new HttpHeaders();
-        if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        HttpEntity<Void> request = request();
         String apiUrl = utils.serviceUrl("board-service", "/admin/block/" + email);
-        System.out.println(apiUrl);
         ResponseEntity<Void> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, Void.class);
 
         if (item.getStatusCode() != HttpStatus.NO_CONTENT) {
             throw new BadRequestException(utils.getMessage("Member.block"));
+        }
+
+        if (!messageStatus(List.of(email), true)) {
+            throw new BadRequestException(utils.getMessage("Member.message.status"));
         }
 
         memberRepository.saveAndFlush(member);
@@ -118,6 +114,11 @@ public class MemberStatusUpdateService {
             Member member = statusBlock(email);
             members.add(member);
         }
+
+        if (!messageStatus(emails, true)) {
+            throw new BadRequestException(utils.getMessage("Member.message.status"));
+        }
+
         return members;
     }
 
@@ -146,6 +147,12 @@ public class MemberStatusUpdateService {
                 throw new BadRequestException(utils.getMessage("Member.comment.status"));
             }
         }
+
+        if (!messageStatus(List.of(email), false)) {
+            // unblock thr
+        }
+
+
         memberRepository.saveAndFlush(member);
     }
 
@@ -153,13 +160,14 @@ public class MemberStatusUpdateService {
         for (String email : emails) {
             statusUnblock(email, status);
         }
+
+        if (!messageStatus(emails, false)) {
+            // unblock thr
+        }
     }
 
     private ResponseEntity<Void> addInfo(String url, List<Long> seq, DomainStatus status) {
-        HttpHeaders headers = new HttpHeaders(); // 헤더 생성
-        if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+        HttpEntity<Void> request = request();
         String result = seq.stream()
                 .map(a -> "seq=" + a)
                 .collect(Collectors.joining("&"));
@@ -167,6 +175,33 @@ public class MemberStatusUpdateService {
         ResponseEntity<Void> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, Void.class);
 
         return item;
+    }
+
+    private boolean messageStatus(List<String> emails, boolean status) {
+        for (String email : emails) {
+            Member member = memberInfoService.get(email);
+            if (member == null) {
+                throw new MemberNotFoundException();
+            }
+        }
+
+        HttpHeaders headers = new HttpHeaders(); // 헤더 생성
+        if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<List<String>> request = new HttpEntity<>(emails, headers);
+        String apiUrl = utils.serviceUrl("message-service", "/admin/status?status=" + status);
+        ResponseEntity<Void> item = restTemplate.exchange(apiUrl, HttpMethod.PATCH, request, Void.class);
+
+        return item.getStatusCode() == HttpStatus.OK;
+    }
+
+    private HttpEntity<Void> request() {
+        HttpHeaders headers = new HttpHeaders(); // 헤더 생성
+        if (StringUtils.hasText(utils.getAuthToken())) headers.setBearerAuth(utils.getAuthToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        return new HttpEntity<>(headers);
     }
 
 }

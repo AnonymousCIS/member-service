@@ -32,7 +32,7 @@ public class PasswordValidator implements Validator, org.anonymous.global.valida
         RequestPassword request = (RequestPassword) target;
         String password = request.getPassword();
         String confirmPassword = request.getConfirmPassword();
-        String code = request.getCode();
+        Integer code = Integer.valueOf(request.getCode());
 
         if (password.length() < 8) {
             errors.rejectValue("password","Size");
@@ -61,8 +61,9 @@ public class PasswordValidator implements Validator, org.anonymous.global.valida
 
         // region 3. 확실하게 인증코드 발급 후 들어온건지 확인.
 
-        if (utils.getValue(utils.getUserHash() + "_password") != null && utils.getValue(utils.getUserHash() + "_password").equals(code)) {
-
+        if (utils.getValue(utils.getUserHash() + "_password") == null && !utils.getValue(utils.getUserHash() + "_password").equals(code)) {
+            System.out.println("틀렸습니다.");
+            errors.rejectValue("confirmPassword","Mismatch");
         }
 
         // endregion

@@ -1,6 +1,7 @@
 package org.anonymous.member.services;
 
 import lombok.RequiredArgsConstructor;
+import org.anonymous.global.libs.Utils;
 import org.anonymous.member.constants.Authority;
 import org.anonymous.member.constants.MemberCondition;
 import org.anonymous.member.controllers.RequestJoin;
@@ -44,6 +45,7 @@ public class MemberUpdateService {
     // 같은 getter setter 처리시 일괄 처리해주는 Reflection API 편의 기능
     private final ModelMapper modelMapper;
     private final MemberInfoService memberInfoService;
+    private final Utils utils;
 
     /**
      * 메서드 오버로드 - 커맨드 객체의 타입에 따라서
@@ -96,11 +98,9 @@ public class MemberUpdateService {
 
     public Member process(RequestUpdate form, List<Authority> authorities) {
         String email = form.getEmail();
-        System.out.println("email: " + email);
 
 /*        Member member = memberUtil.isAdmin() && StringUtils.hasText(email) ? memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email)) : memberUtil.getMember(); // 로그인한 사용자의 정보를 가지고온다.*/
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
-        System.out.println("member : " + member);
         String password = form.getPassword();
 
         if (form.getMode().equals("edit")) { // 수정
@@ -122,6 +122,7 @@ public class MemberUpdateService {
             String hash = passwordEncoder.encode(password);
             member.setPassword(hash);
             member.setCredentialChangedAt(LocalDateTime.now());
+            utils.deleteValue(utils.getUserHash() + "_password");
         }
 
         List<Authorities> _authorities = null;

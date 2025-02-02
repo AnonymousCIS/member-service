@@ -221,7 +221,7 @@ public class Utils {
     /**
      * 사용자 구분을 위한 해시값 조회
      */
-    public String getUserHash(){
+    public String getUserHash() {
         String userKey = "" + Objects.hash("userHash");
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies){

@@ -46,6 +46,7 @@ public class MemberPasswordSendService {
 
     public HttpStatusCode addInfo(String url, String mode, String email, Integer code) {
         mode = StringUtils.hasText(mode) ? mode : "verify";
+
         String token = utils.getAuthToken();
         HttpHeaders headers = new HttpHeaders();
         if (StringUtils.hasText(token)) headers.setBearerAuth(token);
