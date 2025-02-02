@@ -1,6 +1,7 @@
 package org.anonymous.member.validators;
 
 import lombok.RequiredArgsConstructor;
+import org.anonymous.global.libs.Utils;
 import org.anonymous.member.controllers.RequestPassword;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,10 @@ import org.springframework.validation.Validator;
 
 @Lazy
 @Component
+@RequiredArgsConstructor
 public class PasswordValidator implements Validator, org.anonymous.global.validators.PasswordValidator {
+
+    private final Utils utils;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -28,6 +32,7 @@ public class PasswordValidator implements Validator, org.anonymous.global.valida
         RequestPassword request = (RequestPassword) target;
         String password = request.getPassword();
         String confirmPassword = request.getConfirmPassword();
+        String code = request.getCode();
 
         if (password.length() < 8) {
             errors.rejectValue("password","Size");
@@ -50,6 +55,14 @@ public class PasswordValidator implements Validator, org.anonymous.global.valida
 
         if (!password.equals(confirmPassword)) {
             errors.rejectValue("confirmPassword","Mismatch");
+        }
+
+        // endregion
+
+        // region 3. 확실하게 인증코드 발급 후 들어온건지 확인.
+
+        if (utils.getValue(utils.getUserHash() + "_password") != null && utils.getValue(utils.getUserHash() + "_password").equals(code)) {
+
         }
 
         // endregion

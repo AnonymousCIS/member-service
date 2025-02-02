@@ -15,4 +15,7 @@ public class RequestPassword {
     private String confirmPassword;
 
     private String mode;
+
+    @NotBlank
+    private String code;
 }
