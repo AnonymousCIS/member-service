@@ -16,6 +16,7 @@ import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.QAuthorities;
 import org.anonymous.member.entities.TempToken;
 import org.anonymous.member.exceptions.MemberNotFoundException;
+import org.anonymous.member.exceptions.TempTokenNotFoundException;
 import org.anonymous.member.libs.MemberUtil;
 import org.anonymous.member.repositories.AuthoritiesRepository;
 import org.anonymous.member.repositories.MemberRepository;
@@ -204,6 +205,10 @@ public class MemberUpdateService implements PasswordValidator {
 
 
         TempToken tempToken = tempTokenService.get(token);
+
+        if (tempToken.getAction() != TokenAction.PASSWORD_CHANGE) {
+            throw new TempTokenNotFoundException();
+        }
 
         // 비밀번호 자리수 체크
 
