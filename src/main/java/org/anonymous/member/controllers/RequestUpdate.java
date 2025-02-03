@@ -33,6 +33,4 @@ public class RequestUpdate {
     private List<String> optionalTerms;
 
     private List<Authority> authorities;
-
-    private String mode;
 }

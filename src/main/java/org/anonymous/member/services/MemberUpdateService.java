@@ -1,14 +1,21 @@
 package org.anonymous.member.services;
 
 import lombok.RequiredArgsConstructor;
+import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
+import org.anonymous.global.validators.PasswordValidator;
 import org.anonymous.member.constants.Authority;
 import org.anonymous.member.constants.MemberCondition;
+import org.anonymous.member.constants.TokenAction;
+import org.anonymous.member.controllers.RequestChangePassword;
+import org.anonymous.member.controllers.RequestFindPassword;
 import org.anonymous.member.controllers.RequestJoin;
 import org.anonymous.member.controllers.RequestUpdate;
 import org.anonymous.member.entities.Authorities;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.QAuthorities;
+import org.anonymous.member.entities.TempToken;
+import org.anonymous.member.exceptions.MemberNotFoundException;
 import org.anonymous.member.libs.MemberUtil;
 import org.anonymous.member.repositories.AuthoritiesRepository;
 import org.anonymous.member.repositories.MemberRepository;
@@ -32,19 +39,19 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class MemberUpdateService {
+public class MemberUpdateService implements PasswordValidator {
 
-    private final MemberRepository memberRepository;
+
 
     private final AuthoritiesRepository authoritiesRepository;
-
+    private final MemberRepository memberRepository;
+    private final TempTokenService tempTokenService;
     private final PasswordEncoder passwordEncoder;
     private final MemberUtil memberUtil;
 
     // ModelMapper
     // 같은 getter setter 처리시 일괄 처리해주는 Reflection API 편의 기능
     private final ModelMapper modelMapper;
-    private final MemberInfoService memberInfoService;
     private final Utils utils;
 
     /**
@@ -103,26 +110,18 @@ public class MemberUpdateService {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
         String password = form.getPassword();
 
-        if (form.getMode().equals("edit")) { // 수정
-            if (StringUtils.hasText(password)) {
-                String hash = passwordEncoder.encode(password);
-                member.setPassword(hash);
-                member.setCredentialChangedAt(LocalDateTime.now());
-            }
-            member.setZipCode(form.getZipCode());
-            member.setAddress(form.getAddress());
-            member.setAddressSub(form.getAddressSub());
-            member.setPhoneNumber(form.getPhoneNumber());
-            List<String> optionalTerms = form.getOptionalTerms();
-            if (optionalTerms != null) {
-                member.setOptionalTerms(String.join("||", optionalTerms));
-            }
-
-        } else { // 비밀번호 찾기
+        if (StringUtils.hasText(password)) {
             String hash = passwordEncoder.encode(password);
             member.setPassword(hash);
             member.setCredentialChangedAt(LocalDateTime.now());
-            utils.deleteValue(utils.getUserHash() + "_password");
+        }
+        member.setZipCode(form.getZipCode());
+        member.setAddress(form.getAddress());
+        member.setAddressSub(form.getAddressSub());
+        member.setPhoneNumber(form.getPhoneNumber());
+        List<String> optionalTerms = form.getOptionalTerms();
+        if (optionalTerms != null) {
+            member.setOptionalTerms(String.join("||", optionalTerms));
         }
 
         List<Authorities> _authorities = null;
@@ -177,4 +176,73 @@ public class MemberUpdateService {
         }
         /* 회원 권한 업데이트 처리 E */
     }
+
+    /**
+     * 회원이 입력한 회원명 + 휴대전화 번호로 회원을 찾고 
+     * 가입한 이메일로 비번 변경 가능한 임시 토큰을 발급하고 메일을 전송
+     * @param form
+     */
+    public void issueToken(RequestFindPassword form) {
+        String name = form.getName();
+        String phoneNumber = form.getPhoneNumber();
+
+        Member member = memberRepository.findByNameAndPhoneNumber(name, phoneNumber).orElseThrow(MemberNotFoundException::new);
+        String email = member.getEmail();
+        String origin = form.getOrigin();
+
+        TempToken token = tempTokenService.issue(email, TokenAction.PASSWORD_CHANGE, origin); // 토큰발급
+        tempTokenService.sendEmail(token.getToken()); // 이메일 전송
+    }
+
+    /**
+     * 비밀번호 변경
+     * @param form
+     */
+    public void changePassword(RequestChangePassword form) {
+        String token = form.getToken();
+        String password = form.getPassword();
+
+
+        TempToken tempToken = tempTokenService.get(token);
+
+        // 비밀번호 자리수 체크
+
+        if (password.length() < 8) {
+            throw new BadRequestException(utils.getMessage("Size.requestJoin.password"));
+        }
+
+        // 비밀번호 복잡성
+        if (!alphaCheck(password, false) || !numberCheck(password) || !specialCharsCheck(password)) {
+            throw new BadRequestException(utils.getMessage("Complexity.requestJoin.password"));
+        }
+
+        Member member = tempToken.getMember();
+        
+        String hash = passwordEncoder.encode(password);
+        member.setPassword(hash);
+        member.setCredentialChangedAt(LocalDateTime.now());
+        memberRepository.saveAndFlush(member);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

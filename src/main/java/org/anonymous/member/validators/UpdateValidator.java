@@ -29,20 +29,15 @@ public class UpdateValidator implements Validator, PasswordValidator {
 
         String password = request.getPassword();
         String confirmPassword = request.getConfirmPassword();
-        String mode = request.getMode();
-
 
         /**
          * 비밀번호 수정 할 때 회원정보 수정이면 비밀번호 있는지 확인.
          * 만약 없으면 그냥 return하게 됨.
          * 또한 비밀번호 수정이 아니라 비밀번호 찾기라면 비밀번호를 체크해야함.
          */
-        if (mode.equals("edit")) {
-            if (!StringUtils.hasText(password)) { // 비밀번호 있는지 확인.
-                return;
-            }
+        if (!StringUtils.hasText(password)) { // 비밀번호 있는지 확인.
+            return;
         }
-
         if (password.length() < 8) {
             errors.rejectValue("password","Size");
         }
