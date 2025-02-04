@@ -3,6 +3,7 @@ package org.anonymous.member.services;
 
 import lombok.RequiredArgsConstructor;
 import org.anonymous.global.libs.Utils;
+import org.anonymous.global.repositories.CodeValueRepository;
 import org.anonymous.global.rests.JSONData;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.exceptions.MemberNotFoundException;
@@ -33,15 +34,21 @@ public class MemberPasswordSendService {
 
     public boolean sendVerify(Integer code) {
         String url = "/verify?authCode=";
-        return addInfo(url,"verify",null, code) == HttpStatus.NO_CONTENT;
+
+        boolean checkCodeValue = addInfo(url,"verify",null, code) == HttpStatus.NO_CONTENT;
+
+        if (checkCodeValue) {
+            utils.saveValue(utils.getUserHash() + "_password", code);
+        }
+
+        return checkCodeValue;
     }
 
     public HttpStatusCode addInfo(String url, String mode, String email, Integer code) {
         mode = StringUtils.hasText(mode) ? mode : "verify";
+
         String token = utils.getAuthToken();
         HttpHeaders headers = new HttpHeaders();
-        String userKey = "" + Objects.hash("userHash");
-        headers.set(HttpHeaders.COOKIE, userKey + "=" + utils.getUserHash());
         if (StringUtils.hasText(token)) headers.setBearerAuth(token);
         HttpEntity<String> request = new HttpEntity<>(headers);
 

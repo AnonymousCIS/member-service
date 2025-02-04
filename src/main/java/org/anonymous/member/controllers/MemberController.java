@@ -23,7 +23,6 @@ import org.anonymous.member.services.MemberPasswordSendService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
-import org.anonymous.member.validators.PasswordValidator;
 import org.anonymous.member.validators.UpdateValidator;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +50,6 @@ public class MemberController {
     private final UpdateValidator updateValidator;
     private final MemberUpdateService updateService;
     private final MemberRepository memberRepository;
-    private final PasswordValidator passwordValidator;
     private final MemberInfoService memberInfoService;
     private final MemberDeleteService memberDeleteService;
     private final MemberPasswordSendService memberPasswordSendService;
@@ -186,7 +184,6 @@ public class MemberController {
     @PatchMapping("/edit")
     public JSONData edit(@RequestBody @Valid RequestUpdate update, Errors errors) {
 
-        update.setMode("edit");
         updateValidator.validate(update, errors);
 
         if(errors.hasErrors()) {
@@ -199,50 +196,53 @@ public class MemberController {
         return new JSONData(member);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @GetMapping("/send/{to}")
-    public void passwordSend(@PathVariable("to") String to) {
-        if (!memberPasswordSendService.sendEmail(to)) {
-            throw new BadRequestException(utils.getMessage("Member.password.send"));
-        }
-    }
+    // region 사용하지 않는 코드
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @GetMapping("/verify")
-    public void passwordVerify(@RequestParam(name="authCode", required = false) Integer authCode) {
-        if (!memberPasswordSendService.sendVerify(authCode)) {
-            throw new BadRequestException(utils.getMessage("Member.password.verify"));
-        }
-    }
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    @GetMapping("/send/{to}")
+//    public void passwordSend(@PathVariable("to") String to) {
+//        if (!memberPasswordSendService.sendEmail(to)) {
+//            throw new BadRequestException(utils.getMessage("Member.password.send"));
+//        }
+//    }
+//
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    @GetMapping("/verify")
+//    public void passwordVerify(@RequestParam(name="authCode", required = false) Integer authCode) {
+//        if (!memberPasswordSendService.sendVerify(authCode)) {
+//            throw new BadRequestException(utils.getMessage("Member.password.verify"));
+//        }
+//    }
+//
+//    /**
+//     * 비밀번호 찾기 후 수정.
+//     * @param update
+//     * @return
+//     */
+//    @Operation(summary = "회원 정보 수정", method = "PATCH")
+//    @ApiResponse(responseCode = "200", description = "수정 완료 됬을 시 200")
+//    @Parameters({
+//            @Parameter(name = "email", required = true, description = "이메일"),
+//            @Parameter(name = "password", required = true, description = "비밀번호"),
+//            @Parameter(name = "confirmPassword", required = true, description = "비밀번호 확인"),
+//            @Parameter(name = "mode", description = "password", examples = @ExampleObject(
+//                    name="mode", value = "edit", description = "수정이면 edit, 패스워드 찾기면 password")),
+//    })
+//    @PatchMapping("/password")
+//    public JSONData password(@RequestBody @Valid RequestPassword update, Errors errors) {
+//        passwordValidator.validate(update, errors);
+//
+//        RequestUpdate requestUpdate = modelMapper.map(update, RequestUpdate.class);
+//        if(errors.hasErrors()) {
+//            throw new BadRequestException(utils.getErrorMessages(errors));
+//        }
+//
+//        Member member = updateService.process(requestUpdate);
+//
+//        return new JSONData(member);
+//    }
 
-    /**
-     * 비밀번호 찾기 후 수정.
-     * @param update
-     * @return
-     */
-    @Operation(summary = "회원 정보 수정", method = "PATCH")
-    @ApiResponse(responseCode = "200", description = "수정 완료 됬을 시 200")
-    @Parameters({
-            @Parameter(name = "email", required = true, description = "이메일"),
-            @Parameter(name = "password", required = true, description = "비밀번호"),
-            @Parameter(name = "confirmPassword", required = true, description = "비밀번호 확인"),
-            @Parameter(name = "mode", description = "password", examples = @ExampleObject(
-                    name="mode", value = "edit", description = "수정이면 edit, 패스워드 찾기면 password")),
-    })
-    @PatchMapping("/password")
-    public JSONData password(@RequestBody @Valid RequestPassword update, Errors errors) {
-        passwordValidator.validate(update, errors);
-
-        RequestUpdate requestUpdate = modelMapper.map(update, RequestUpdate.class);
-        requestUpdate.setMode("password");
-        if(errors.hasErrors()) {
-            throw new BadRequestException(utils.getErrorMessages(errors));
-        }
-
-        Member member = updateService.process(requestUpdate);
-
-        return new JSONData(member);
-    }
+    // endregion
 
     /*********** 강사님추가 S  *************/
     @Operation(summary = "회원 조회", method = "GET")
@@ -271,12 +271,38 @@ public class MemberController {
     }
     /*********** 강사님추가 E  *************/
 
-    // 회원 전용 접근 테스트
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/test")
-    public void test(@AuthenticationPrincipal MemberInfo memberInfo) {
 
-        System.out.println(memberInfo);
-        System.out.println("회원 전용 URL");
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/find/password")
+    public void findPassword(@RequestBody @Valid RequestFindPassword form, Errors errors) {
+        if (errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
+        updateService.issueToken(form);
     }
+
+    /**
+     *
+     * @param form
+     * @param errors
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping("/change/password")
+    public void changePassword(@RequestBody @Valid RequestChangePassword form, Errors errors) {
+        if (errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
+        updateService.changePassword(form);
+    }
+
+//    // 회원 전용 접근 테스트
+//    @PreAuthorize("isAuthenticated()")
+//    @GetMapping("/test")
+//    public void test(@AuthenticationPrincipal MemberInfo memberInfo) {
+//
+//        System.out.println(memberInfo);
+//        System.out.println("회원 전용 URL");
+//    }
 }
