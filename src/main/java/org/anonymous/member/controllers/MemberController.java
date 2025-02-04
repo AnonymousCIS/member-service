@@ -1,6 +1,5 @@
 package org.anonymous.member.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -19,7 +18,6 @@ import org.anonymous.member.jwt.TokenService;
 import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.services.MemberDeleteService;
 import org.anonymous.member.services.MemberInfoService;
-import org.anonymous.member.services.MemberPasswordSendService;
 import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
@@ -52,7 +50,6 @@ public class MemberController {
     private final MemberRepository memberRepository;
     private final MemberInfoService memberInfoService;
     private final MemberDeleteService memberDeleteService;
-    private final MemberPasswordSendService memberPasswordSendService;
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
