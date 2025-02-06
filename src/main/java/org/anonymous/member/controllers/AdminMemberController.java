@@ -260,7 +260,7 @@ public class AdminMemberController {
     @Parameter(name = "email", required = true, description = "이메일")
     @ApiResponse(responseCode = "200")
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/unblock")
+    @PatchMapping("/unblock/{email}")
     public void unblock(@PathVariable("email") String email, @RequestParam("status") DomainStatus status) {
         memberStatusUpdateService.statusUnblock(email, status);
     }
