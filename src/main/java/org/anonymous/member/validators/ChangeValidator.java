@@ -1,22 +1,17 @@
 package org.anonymous.member.validators;
-import lombok.RequiredArgsConstructor;
-import org.anonymous.global.validators.MobileValidator;
+
 import org.anonymous.global.validators.PasswordValidator;
+import org.anonymous.member.controllers.RequestChangePassword;
 import org.anonymous.member.controllers.RequestUpdate;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+public class ChangeValidator implements Validator, PasswordValidator {
 
-@Lazy
-@Component
-@RequiredArgsConstructor
-public class UpdateValidator implements Validator, PasswordValidator, MobileValidator {
     @Override
     public boolean supports(Class<?> clazz) {
-        return clazz.isAssignableFrom(RequestUpdate.class);
+        return clazz.isAssignableFrom(RequestChangePassword.class);
     }
 
     @Override
@@ -26,22 +21,14 @@ public class UpdateValidator implements Validator, PasswordValidator, MobileVali
             return;
         }
 
-        RequestUpdate request = (RequestUpdate) target;
+        RequestChangePassword request = (RequestChangePassword) target;
 
         String password = request.getPassword();
         String confirmPassword = request.getConfirmPassword();
-        String phoneNumber = request.getPhoneNumber();
 
-        /**
-         * 비밀번호 수정 할 때 회원정보 수정이면 비밀번호 있는지 확인.
-         * 만약 없으면 그냥 return하게 됨.
-         * 또한 비밀번호 수정이 아니라 비밀번호 찾기라면 비밀번호를 체크해야함.
-         */
-        if (!StringUtils.hasText(password)) { // 비밀번호 있는지 확인.
-            return;
-        }
         if (password.length() < 8) {
             errors.rejectValue("password","Size");
+            return;
         }
 
         if (!StringUtils.hasText(confirmPassword)) { // 비밀번호 확인이 있는지 확인.
@@ -64,9 +51,5 @@ public class UpdateValidator implements Validator, PasswordValidator, MobileVali
         }
 
         // endregion
-
-        if (!checkMobile(phoneNumber)) {
-            errors.rejectValue("phoneNumber", "Complexity");
-        }
     }
 }
