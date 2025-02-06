@@ -22,7 +22,6 @@ import org.anonymous.member.services.MemberUpdateService;
 import org.anonymous.member.validators.JoinValidator;
 import org.anonymous.member.validators.LoginValidator;
 import org.anonymous.member.validators.UpdateValidator;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +40,6 @@ public class MemberController {
     private String frontDomain;
 
     private final Utils utils;
-    private final ModelMapper modelMapper;
     private final TokenService tokenService;
     private final JoinValidator joinValidator;
     private final LoginValidator loginValidator;
@@ -269,6 +267,13 @@ public class MemberController {
     /*********** 강사님추가 E  *************/
 
 
+    @Operation(summary = "비밀번호 찾기", method = "GET" , description = "이메일로 비밀번호 변경 url을 토큰 실어서 전달해준다.")
+    @ApiResponse(responseCode = "200", description = "회원 유무 판단, boolean 값으로 return 해준다.")
+    @Parameters({
+            @Parameter(name="name", description = "회원명", example = "이이름"),
+            @Parameter(name="phoneNumber", description = "휴대전화번호", example = "010-1234-5678"),
+            @Parameter(name="origin", description = "프론트엔드 주소", example = "https://pintech.onedu.blue"),
+    })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping("/find/password")
     public void findPassword(@RequestBody @Valid RequestFindPassword form, Errors errors) {
@@ -284,6 +289,13 @@ public class MemberController {
      * @param form
      * @param errors
      */
+    @Operation(summary = "비밀번호 변경", method = "GET" , description = "비밀번호를 변경한다.")
+    @ApiResponse(responseCode = "200", description = "회원 유무 판단, boolean 값으로 return 해준다.")
+    @Parameters({
+            @Parameter(name="token", description = "토큰 값"),
+            @Parameter(name="password", description = "변경할 비밀번호"),
+            @Parameter(name="confirmPassword", description = "변경할 비밀번호 확인"),
+    })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/change/password")
     public void changePassword(@RequestBody @Valid RequestChangePassword form, Errors errors) {

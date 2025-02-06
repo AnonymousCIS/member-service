@@ -11,4 +11,7 @@ public class RequestChangePassword {
 
     @NotBlank
     private String password; // 변경할 비밀번호
+
+    @NotBlank
+    private String confirmPassword; // 변경할 비밀번호
 }
