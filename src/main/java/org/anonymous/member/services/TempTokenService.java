@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,10 +72,9 @@ public class TempTokenService {
         String tokenUrl = tempToken.getOrigin() + tempToken.getToken();
         String subject = tempToken.getAction() == TokenAction.PASSWORD_CHANGE ? "비밀번호 변경 안내입니다." : "....";
 
+        Map<String, Object> data = new HashMap<>();
 
-        Map<String, String> data = new HashMap<>();
-
-        data.put("to", email);
+        data.put("to", List.of(email));
         data.put("subject", subject);
         data.put("content", tokenUrl);
 
