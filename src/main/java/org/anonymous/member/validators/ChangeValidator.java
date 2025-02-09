@@ -1,12 +1,16 @@
 package org.anonymous.member.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.anonymous.global.validators.PasswordValidator;
 import org.anonymous.member.controllers.RequestChangePassword;
-import org.anonymous.member.controllers.RequestUpdate;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+@Lazy
+@Component
 public class ChangeValidator implements Validator, PasswordValidator {
 
     @Override
