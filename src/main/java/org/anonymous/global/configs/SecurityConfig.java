@@ -83,8 +83,7 @@ public class SecurityConfig {
                     c.requestMatchers(
                                     "/join", // GateWay 연동시 /api/v1/member/join 예정
                                     "/login",
-                                    "/find/**",
-                                    "/change/**",
+                                    "/password/**",
                                     "/apidocs.html",
                                     "/swagger-ui/**",
                                     "/api-docs/**").permitAll()
