@@ -1,11 +1,16 @@
 package org.anonymous.member.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.anonymous.global.validators.MobileValidator;
 import org.anonymous.member.controllers.RequestFindPassword;
 import org.anonymous.member.controllers.RequestJoin;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+@Lazy
+@Component
 public class FindValidator implements Validator, MobileValidator {
     @Override
     public boolean supports(Class<?> clazz) {

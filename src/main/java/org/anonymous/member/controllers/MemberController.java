@@ -19,9 +19,7 @@ import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.services.MemberDeleteService;
 import org.anonymous.member.services.MemberInfoService;
 import org.anonymous.member.services.MemberUpdateService;
-import org.anonymous.member.validators.JoinValidator;
-import org.anonymous.member.validators.LoginValidator;
-import org.anonymous.member.validators.UpdateValidator;
+import org.anonymous.member.validators.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +42,8 @@ public class MemberController {
     private final JoinValidator joinValidator;
     private final LoginValidator loginValidator;
     private final UpdateValidator updateValidator;
+    private final ChangeValidator changeValidator;
+    private final FindValidator findValidator;
     private final MemberUpdateService updateService;
     private final MemberRepository memberRepository;
     private final MemberInfoService memberInfoService;
@@ -268,7 +268,7 @@ public class MemberController {
 
 
     @Operation(summary = "비밀번호 찾기", method = "GET" , description = "이메일로 비밀번호 변경 url을 토큰 실어서 전달해준다.")
-    @ApiResponse(responseCode = "200", description = "회원 유무 판단, boolean 값으로 return 해준다.")
+    @ApiResponse(responseCode = "204")
     @Parameters({
             @Parameter(name="name", description = "회원명", example = "이이름"),
             @Parameter(name="phoneNumber", description = "휴대전화번호", example = "010-1234-5678"),
@@ -277,6 +277,8 @@ public class MemberController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping("/password/find")
     public void findPassword(@RequestBody @Valid RequestFindPassword form, Errors errors) {
+        findValidator.validate(form, errors);
+
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
@@ -289,8 +291,8 @@ public class MemberController {
      * @param form
      * @param errors
      */
-    @Operation(summary = "비밀번호 변경", method = "GET" , description = "비밀번호를 변경한다.")
-    @ApiResponse(responseCode = "200", description = "회원 유무 판단, boolean 값으로 return 해준다.")
+    @Operation(summary = "비밀번호 변경", method = "PATCH" , description = "비밀번호를 변경한다.")
+    @ApiResponse(responseCode = "204")
     @Parameters({
             @Parameter(name="token", description = "토큰 값"),
             @Parameter(name="password", description = "변경할 비밀번호"),
@@ -299,6 +301,7 @@ public class MemberController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/password/change")
     public void changePassword(@RequestBody @Valid RequestChangePassword form, Errors errors) {
+        changeValidator.validate(form, errors);
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
