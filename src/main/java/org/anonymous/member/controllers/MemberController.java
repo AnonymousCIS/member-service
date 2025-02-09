@@ -275,7 +275,7 @@ public class MemberController {
             @Parameter(name="origin", description = "프론트엔드 주소", example = "https://pintech.onedu.blue"),
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PostMapping("/find/password")
+    @PostMapping("/password/find")
     public void findPassword(@RequestBody @Valid RequestFindPassword form, Errors errors) {
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
@@ -297,7 +297,7 @@ public class MemberController {
             @Parameter(name="confirmPassword", description = "변경할 비밀번호 확인"),
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PatchMapping("/change/password")
+    @PatchMapping("/password/change")
     public void changePassword(@RequestBody @Valid RequestChangePassword form, Errors errors) {
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
