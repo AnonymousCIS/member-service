@@ -1,9 +1,11 @@
 package org.anonymous.member.validators;
 
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.anonymous.global.validators.MobileValidator;
 import org.anonymous.global.validators.PasswordValidator;
 import org.anonymous.member.controllers.RequestJoin;
+import org.anonymous.member.entities.Member;
 import org.anonymous.member.repositories.MemberRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -44,6 +46,10 @@ public class JoinValidator implements Validator, PasswordValidator, MobileValida
         String phoneNumber = form.getPhoneNumber();
 
         // 1. 이메일 중복 여부 체크 S
+
+        if (memberRepository.phoneNumberExists(phoneNumber)) {
+            errors.rejectValue("phoneNumber", "Duplicated");
+        }
 
         if (memberRepository.exists(email)) {
 

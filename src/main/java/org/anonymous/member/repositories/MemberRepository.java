@@ -18,6 +18,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, QuerydslP
 
     Optional<Member> findByNameAndPhoneNumber(String name, String Mobile);
 
+    Optional<Member> findByPhoneNumber(String mobile);
+
+    default boolean phoneNumberExists(String phoneNumber) {
+        QMember member = QMember.member;
+
+        return exists(member.phoneNumber.eq(phoneNumber));
+    }
+
     default boolean exists(String email) {
 
         QMember member = QMember.member;
