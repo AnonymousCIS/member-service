@@ -9,6 +9,7 @@ import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.TempToken;
 import org.anonymous.member.exceptions.MemberNotFoundException;
 import org.anonymous.member.exceptions.TempTokenExpiredException;
+import org.anonymous.member.exceptions.TempTokenNotFoundException;
 import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.repositories.TempTokenRepository;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -69,14 +70,14 @@ public class TempTokenService {
         Member member = tempToken.getMember();
         String email = member.getEmail();
 
-        String tokenUrl = tempToken.getOrigin() + "?" + tempToken.getToken();
+        String tokenUrl = tempToken.getOrigin() + "?token=" + tempToken.getToken();
         String subject = tempToken.getAction() == TokenAction.PASSWORD_CHANGE ? "비밀번호 변경 안내입니다." : "....";
 
         Map<String, Object> data = new HashMap<>();
 
         data.put("to", List.of(email));
         data.put("subject", subject);
-        data.put("content", tokenUrl);
+        data.put("content", "<a href='" + tokenUrl + "' target='_blank'>" + tokenUrl + "</a>" ) ;
 
         try {
             String emailUrl = utils.serviceUrl("email-service","/tpl/general");
@@ -95,7 +96,7 @@ public class TempTokenService {
     }
 
     public TempToken get(String token) {
-        TempToken tempToken = tempTokenRepository.findByToken(token).orElseThrow(TempTokenExpiredException::new);
+        TempToken tempToken = tempTokenRepository.findByToken(token).orElseThrow(TempTokenNotFoundException::new);
 
         if (tempToken.isExpired()) {
             throw new TempTokenExpiredException();

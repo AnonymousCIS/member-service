@@ -19,6 +19,7 @@ import org.anonymous.member.repositories.MemberRepository;
 import org.anonymous.member.services.MemberDeleteService;
 import org.anonymous.member.services.MemberInfoService;
 import org.anonymous.member.services.MemberUpdateService;
+import org.anonymous.member.services.TempTokenService;
 import org.anonymous.member.validators.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,7 @@ public class MemberController {
     private final MemberRepository memberRepository;
     private final MemberInfoService memberInfoService;
     private final MemberDeleteService memberDeleteService;
+    private final TempTokenService tempTokenService;
 
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.CREATED) // 201
@@ -309,6 +311,12 @@ public class MemberController {
         updateService.changePassword(form);
     }
 
+    @Operation(summary = "토큰 검증", method = "GET" , description = "토큰이 유효한지 검증한다.")
+    @ApiResponse(responseCode = "200")
+    @GetMapping("/password/validate/token/{token}")
+    public void validateToken(@PathVariable("token") String token) {
+        tempTokenService.get(token);
+    }
 //    // 회원 전용 접근 테스트
 //    @PreAuthorize("isAuthenticated()")
 //    @GetMapping("/test")
