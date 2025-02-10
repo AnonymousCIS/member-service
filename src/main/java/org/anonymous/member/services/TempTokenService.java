@@ -69,7 +69,7 @@ public class TempTokenService {
         Member member = tempToken.getMember();
         String email = member.getEmail();
 
-        String tokenUrl = tempToken.getOrigin() + tempToken.getToken();
+        String tokenUrl = tempToken.getOrigin() + "?" + tempToken.getToken();
         String subject = tempToken.getAction() == TokenAction.PASSWORD_CHANGE ? "비밀번호 변경 안내입니다." : "....";
 
         Map<String, Object> data = new HashMap<>();
