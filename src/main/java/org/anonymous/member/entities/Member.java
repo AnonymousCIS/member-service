@@ -1,6 +1,8 @@
 package org.anonymous.member.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -19,6 +21,7 @@ import java.util.List;
  */
 @Data
 @Entity
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Member extends BaseEntity {
 
     @Id @GeneratedValue
@@ -52,6 +55,7 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
     private LocalDate birthDt;
 
@@ -65,6 +69,7 @@ public class Member extends BaseEntity {
     private List<Authorities> authorities; // 회원쪽에서도 권한 조회 가능하도록
 
     // 비밀번호 변경 일시
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime credentialChangedAt;
 
     // 자기소개
