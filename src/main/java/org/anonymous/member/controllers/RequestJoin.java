@@ -1,6 +1,5 @@
 package org.anonymous.member.controllers;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.anonymous.member.constants.Gender;
