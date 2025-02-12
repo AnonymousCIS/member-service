@@ -1,5 +1,6 @@
 package org.anonymous.member.controllers;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.anonymous.member.constants.Authority;
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class RequestUpdate {
 
     @NotBlank
