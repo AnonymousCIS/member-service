@@ -216,7 +216,7 @@ public class AdminMemberController {
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
-        Member member = memberUpdateService.process(update);
+        Member member = memberUpdateService.process(update, update.getAuthorities());
         return new JSONData(member);
     }
 
