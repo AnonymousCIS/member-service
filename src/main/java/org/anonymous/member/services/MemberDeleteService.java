@@ -30,20 +30,15 @@ public class MemberDeleteService {
     }
 
     public Member delete(Long seq) {
-        System.out.println("Service 안녕1");
         Member member = addInfo(seq);
-        System.out.println("Service 안녕2");
 
         memberRepository.delete(member);
-        System.out.println("Service 안녕3");
         memberRepository.flush();
         return member;
     }
 
     private Member addInfo(Long seq) {
-        System.out.println("addInfo 안녕1");
         Member member = memberInfoService.get(seq);
-        System.out.println("addInfo 안녕2");
 
         if (member == null) {
             throw new MemberNotFoundException();
