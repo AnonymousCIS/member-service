@@ -34,6 +34,7 @@ public class AdminMemberController {
     private final MemberUpdateService memberUpdateService;
     private final MemberStatusInfoService memberStatusInfoService;
     private final MemberStatusUpdateService memberStatusUpdateService;
+    private final MemberStatusDeleteService memberStatusDeleteService;
 
 //    /**
 //     * 회원 단일 조회
@@ -137,6 +138,34 @@ public class AdminMemberController {
     public JSONData statusUpdate(@RequestBody List<RequestStatus> form) {
 
         List<MemberStatus> memberStatus = memberStatusUpdateService.statuses(form);
+        return new JSONData(memberStatus);
+    }
+
+    /**
+     * 회원 상태 목록 삭제 처리 - 도메인별
+     * @return
+     */
+    @Operation(summary = "회원 상태 목록 삭제 처리 - List<RequestStatus>도메인별", method = "DELETE")
+    @ApiResponse(responseCode = "200")
+    @Parameters({
+            @Parameter(name = "email", description = "이메일"),
+            @Parameter(name = "DomainStatus", description = "도메인 Status", examples = {
+                    @ExampleObject(name = "DomainStatus", value = "ALL"),
+                    @ExampleObject(name = "DomainStatus", value = "SECRET"),
+                    @ExampleObject(name = "DomainStatus", value = "BLOCK"),
+            }),
+            @Parameter(name = "type", description = "도메인별", examples = {
+                    @ExampleObject(name = "String", value = "Board"),
+                    @ExampleObject(name = "String", value = "Message"),
+            }),
+            @Parameter(name = "seq", description = "도베인별 seq", examples = {
+                    @ExampleObject(name = "Long", value = "Board 쪽 block seq"),
+            }),
+    })
+    @DeleteMapping("/statuses")
+    public JSONData statusDelete(@RequestBody List<RequestStatus> form) {
+
+        List<MemberStatus> memberStatus = memberStatusDeleteService.deletes(form);
         return new JSONData(memberStatus);
     }
 
