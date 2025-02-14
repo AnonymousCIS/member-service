@@ -75,12 +75,14 @@ public class Pagination {
         } else {
             int port = request.getServerPort();
             String _port = port == 80 || port == 443 ? "" : ":" + port;
-            baseUrl = String.format("%s://%s%s%s/?", request.getScheme(), request.getServerName(), _port, StringUtils.hasText(request.getContextPath()) ? request.getContextPath() : "/");
+            baseUrl = String.format("%s://%s%s%s?", request.getScheme(), request.getServerName(), _port, StringUtils.hasText(request.getContextPath()) ? request.getContextPath() : "/");
         }
         if (StringUtils.hasText(qs)) {
+//            baseUrl += Arrays.stream(qs.split("&"))
+//                    .filter(s -> !s.contains("page="))
+//                    .collect(Collectors.joining("&")) + "&";
             baseUrl += Arrays.stream(qs.split("&"))
-                    .filter(s -> !s.contains("page="))
-                    .collect(Collectors.joining("&")) + "&";
+                    .filter(s -> !s.contains("page=")).collect(Collectors.joining("&"));
         }
         baseUrl += "page=";
         /* 쿼리스트링 값 처리 E */
