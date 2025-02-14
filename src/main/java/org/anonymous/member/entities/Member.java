@@ -69,7 +69,7 @@ public class Member extends BaseEntity {
     private List<Authorities> authorities; // 회원쪽에서도 권한 조회 가능하도록
 
     // 비밀번호 변경 일시
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime credentialChangedAt;
 
     // 자기소개
