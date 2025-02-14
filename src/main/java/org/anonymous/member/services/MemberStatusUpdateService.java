@@ -36,7 +36,7 @@ public class MemberStatusUpdateService {
 
     public MemberStatus status(RequestStatus form) {
 
-        Member member = memberInfoService.get(form.getEmail());
+        Member member = memberInfoService.get(form.getMember().getEmail());
 
         if (member == null) {
             throw new MemberNotFoundException();
@@ -58,7 +58,7 @@ public class MemberStatusUpdateService {
         List<MemberStatus> memberStatuses = new ArrayList<>();
 
         for (RequestStatus form : forms) {
-            Member member = memberInfoService.get(form.getEmail());
+            Member member = memberInfoService.get(form.getMember().getEmail());
             if (member == null) {
                 throw new MemberNotFoundException();
             }
