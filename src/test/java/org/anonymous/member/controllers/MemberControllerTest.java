@@ -149,7 +149,7 @@ public class MemberControllerTest {
          */
 
         RequestStatus form = new RequestStatus();
-        form.setEmail("user04@test.org");
+        form.getMember().setEmail("user04@test.org");
         form.setStatus(DomainStatus.BLOCK);
         form.setType("board");
         form.setSeq(2L);
