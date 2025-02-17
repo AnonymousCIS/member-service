@@ -11,6 +11,7 @@ import org.anonymous.global.exceptions.BadRequestException;
 import org.anonymous.global.libs.Utils;
 import org.anonymous.global.paging.ListData;
 import org.anonymous.global.rests.JSONData;
+import org.anonymous.global.rests.RequestData;
 import org.anonymous.member.constants.DomainStatus;
 import org.anonymous.member.entities.Member;
 import org.anonymous.member.entities.MemberStatus;
@@ -135,9 +136,9 @@ public class AdminMemberController {
             }),
     })
     @PatchMapping("/statuses")
-    public JSONData statusUpdate(@RequestBody List<RequestStatus> form) {
+    public JSONData statusUpdate(@RequestBody RequestData<RequestStatus> data) {
 
-        List<MemberStatus> memberStatus = memberStatusUpdateService.statuses(form);
+        List<MemberStatus> memberStatus = memberStatusUpdateService.statuses(data.getData());
         return new JSONData(memberStatus);
     }
 
@@ -163,9 +164,9 @@ public class AdminMemberController {
             }),
     })
     @PatchMapping("/statuses/deletes")
-    public JSONData statusDelete(@RequestBody List<RequestStatus> form) {
+    public JSONData statusDelete(@RequestBody RequestData<RequestStatus> data) {
 
-        List<MemberStatus> memberStatus = memberStatusDeleteService.deletes(form);
+        List<MemberStatus> memberStatus = memberStatusDeleteService.deletes(data.getData());
         return new JSONData(memberStatus);
     }
 
