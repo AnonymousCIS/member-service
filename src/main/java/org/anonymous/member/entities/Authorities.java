@@ -1,5 +1,6 @@
 package org.anonymous.member.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,7 @@ import org.anonymous.member.constants.Authority;
 public class Authorities {
 
     @Id
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY) // 거의 항상 Join 할 것 같긴 하지만 우선 학습한 대로 LAZY
     private Member member;
 
