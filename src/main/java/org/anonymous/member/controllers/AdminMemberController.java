@@ -162,7 +162,7 @@ public class AdminMemberController {
                     @ExampleObject(name = "Long", value = "Board 쪽 block seq"),
             }),
     })
-    @DeleteMapping("/statuses")
+    @PatchMapping("/statuses/deletes")
     public JSONData statusDelete(@RequestBody List<RequestStatus> form) {
 
         List<MemberStatus> memberStatus = memberStatusDeleteService.deletes(form);
