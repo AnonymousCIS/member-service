@@ -76,6 +76,9 @@ public class Member extends BaseEntity {
     @Lob
     private String bio;
 
+    @Transient
+    private List<Authority> authorities_;
+
     public List<Authority> get_authorities() {
         return authorities == null || authorities.isEmpty() ? List.of()
                 : authorities.stream().map(Authorities::getAuthority).toList();
