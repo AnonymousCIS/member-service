@@ -242,7 +242,6 @@ public class AdminMemberController {
     })
     @PatchMapping("/update")
     public JSONData edit(@RequestBody RequestUpdate update, Errors errors) {
-
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }

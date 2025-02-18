@@ -1,5 +1,6 @@
 package org.anonymous.member.libs;
 
+import org.anonymous.member.MemberInfo;
 import org.anonymous.member.constants.Authority;
 import org.anonymous.member.entities.Member;
 import org.springframework.security.core.Authentication;
@@ -24,8 +25,10 @@ public class MemberUtil {
     public Member getMember() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Member) {
-            return (Member) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof MemberInfo) {
+
+            MemberInfo memberInfo = (MemberInfo) authentication.getPrincipal();
+            return memberInfo.getMember();
         }
 
         return null;
