@@ -148,11 +148,15 @@ public class MemberStatusInfoService {
         // endregion
     }
 
-    public List<MemberStatus> getStatus(String type) {
+    public List<MemberStatus> getStatus(String type, String email) {
         QMemberStatus ms = QMemberStatus.memberStatus1;
 
+        BooleanBuilder andBuilder = new BooleanBuilder();
+        andBuilder.and(ms.member.email.in(email));
+        andBuilder.and(ms.type.eq(type));
+
         return queryFactory.selectFrom(ms)
-                .where(ms.type.eq(type))
+                .where(andBuilder)
                 .fetch();
     }
 }

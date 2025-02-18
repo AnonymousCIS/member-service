@@ -167,7 +167,6 @@ public class MemberUpdateService implements PasswordValidator {
             List<Authorities> items = (List<Authorities>) authoritiesRepository.findAll(qAuthorities.member.eq(member));
 
             if (items != null) {
-
                 authoritiesRepository.deleteAll(items);
 
                 authoritiesRepository.flush();
