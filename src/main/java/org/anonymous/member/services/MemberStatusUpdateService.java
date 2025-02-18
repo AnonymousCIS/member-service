@@ -125,31 +125,38 @@ public class MemberStatusUpdateService {
     public void statusUnblock(String email, DomainStatus status) {
         Member member = memberInfoService.get(email); // 이메일로 해당멤버 확인
         member.setMemberCondition(MemberCondition.ACTIVE); // 멤버 ACTIVE 로 unblock 처리
-        List<MemberStatus> memberStatusBoard = memberStatusInfoService.getStatus("board"); // block 되어있는 데이터 다 가져오기
-        List<Long> seqBoardList = memberStatusBoard.stream().map(MemberStatus::getSeq).toList(); // 해당 board에 되어있는 seq 다 가져오기
-        String url = "/status?";
-        if (!seqBoardList.isEmpty()) {
-            ResponseEntity<Void> boardItem = addInfo(url, seqBoardList, status);
-            if (boardItem.getStatusCode() != HttpStatus.OK) {
-                throw new BadRequestException(utils.getMessage("Member.board.status"));
+        List<MemberStatus> memberStatusBoard = memberStatusInfoService.getStatus("board", email); // block 되어있는 데이터 다 가져오기
+        if (!memberStatusBoard.isEmpty()) {
+            List<Long> seqBoardList = memberStatusBoard.stream().map(MemberStatus::getSeq).toList(); // 해당 board에 되어있는 seq 다 가져오기
+            String url = "/status?";
+            if (!seqBoardList.isEmpty()) {
+                ResponseEntity<Void> boardItem = addInfo(url, seqBoardList, status);
+                if (boardItem.getStatusCode() != HttpStatus.OK) {
+                    throw new BadRequestException(utils.getMessage("Member.board.status"));
+                }
             }
         }
 
-        List<MemberStatus> memberStatusComment = memberStatusInfoService.getStatus("comment"); // block 되어있는 데이터 다 가져오기
-        List<Long> seqCommentList = memberStatusComment.stream().map(MemberStatus::getSeq).toList(); // 해당 board에 되어있는 seq 다 가져오기
+        List<MemberStatus> memberStatusComment = memberStatusInfoService.getStatus("comment", email); // block 되어있는 데이터 다 가져오기
+        if (!memberStatusComment.isEmpty()) {
+            List<Long> seqCommentList = memberStatusComment.stream().map(MemberStatus::getSeq).toList(); // 해당 board에 되어있는 seq 다 가져오기
 
 
-        if (!seqCommentList.isEmpty()) {
-            url = "/comment/status?";
-            ResponseEntity<Void> commentItem = addInfo(url, seqCommentList, status);
+            if (!seqCommentList.isEmpty()) {
+                String url = "/comment/status?";
+                ResponseEntity<Void> commentItem = addInfo(url, seqCommentList, status);
 
-            if (commentItem.getStatusCode() != HttpStatus.OK) {
-                throw new BadRequestException(utils.getMessage("Member.comment.status"));
+                if (commentItem.getStatusCode() != HttpStatus.OK) {
+                    throw new BadRequestException(utils.getMessage("Member.comment.status"));
+                }
             }
         }
 
-        if (!messageStatus(List.of(email), false)) {
-            // unblock thr
+        List<MemberStatus> memberStatusMessage = memberStatusInfoService.getStatus("message", email);
+        if (!memberStatusMessage.isEmpty()) {
+            if (!messageStatus(List.of(email), false)) {
+                // unblock thr
+            }
         }
 
 
@@ -159,10 +166,6 @@ public class MemberStatusUpdateService {
     public void statusUnblocks(List<String> emails, DomainStatus status) {
         for (String email : emails) {
             statusUnblock(email, status);
-        }
-
-        if (!messageStatus(emails, false)) {
-            // unblock thr
         }
     }
 
