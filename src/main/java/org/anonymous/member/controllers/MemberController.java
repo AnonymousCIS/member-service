@@ -260,7 +260,6 @@ public class MemberController {
 
     @Operation(summary = "회원 유무 판단", method = "GET")
     @ApiResponse(responseCode = "200", description = "회원 유무 판단, boolean 값으로 return 해준다.")
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/exists/{email}")
     public ResponseEntity<Void> exists(@PathVariable("email") String email) {
         HttpStatus status = memberRepository.exists(email) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
