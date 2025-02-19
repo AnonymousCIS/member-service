@@ -244,7 +244,6 @@ public class MemberController {
     /*********** 강사님추가 S  *************/
     @Operation(summary = "회원 조회", method = "GET")
     @ApiResponse(responseCode = "200", description = "회원 조회, Member 객체를 return 해준다.")
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/info/{email}")
     public JSONData info(@PathVariable("email") String email) {
         Member member = null;

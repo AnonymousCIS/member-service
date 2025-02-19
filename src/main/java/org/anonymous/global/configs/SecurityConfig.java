@@ -87,7 +87,8 @@ public class SecurityConfig {
                                     "/apidocs.html",
                                     "/swagger-ui/**",
                                     "/api-docs/**",
-                                    "/exists/**").permitAll()
+                                    "/exists/**",
+                                    "/info/**").permitAll()
                             // 관리자만 접근 가능 패턴
                             .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
 
